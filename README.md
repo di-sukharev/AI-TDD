@@ -103,7 +103,7 @@ export default Fetch;
 
 ## Setup
 
-1. Install ai-tdd globally to use in any repository:
+1. Install AI-TDD globally to use in any repository:
 
    ```sh
    npm install -g ai-tdd
@@ -111,7 +111,7 @@ export default Fetch;
 
 2. Get your API key from [OpenAI](https://platform.openai.com/account/api-keys). Make sure you add payment details, so API works.
 
-3. Set the key to ai-tdd config:
+3. Set the key to AI-TDD config:
 
    ```sh
    ai-tdd config set OPENAI_API_KEY=<your_api_key>
@@ -121,13 +121,13 @@ export default Fetch;
 
 ## Usage
 
-You can call ai-tdd directly :
+You can call AI-TDD like this:
 
 ```sh
 ai-tdd <test suite filepath...>
 ```
 
-You can also call it via `ait` or `tdd` shortcut:
+You can also call it via `ait` or `tdd` shortcuts:
 
 ```sh
 ait <test suite filepath...>
@@ -141,6 +141,6 @@ tdd <test suite filepath...>
 
 ## Payments
 
-You pay for your own requests to OpenAI API. AI-TDD uses GPT-4 model by default, check it's [pricing](https://openai.com/pricing). Maximum response tokens are set to 2000, you can adjust it via `ait config set maxTokens=\<number>.
+You pay for your own requests to OpenAI API. AI-TDD uses GPT-4 model by default, check it's [pricing](https://openai.com/pricing). Maximum response tokens are set to 2000, you can adjust it via `ait config set maxTokens=\<number>`.
 
 I couldn't manage ChatGPT model to solve the problem. I tried to few shot it with a response example, it doesn't understand what I want. If you want to try manage it via ChatGPT — test it and open a PR 🚀
