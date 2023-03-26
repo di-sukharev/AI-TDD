@@ -13,6 +13,7 @@
   ],
   "main": "cli.js",
   "bin": {
+    "aitdd": "./out/cli.cjs",
     "tdd": "./out/cli.cjs",
     "ait": "./out/cli.cjs"
   },

@@ -35,9 +35,18 @@ export async function tddCommand(args: string[] = []) {
 
     if (!filePath) {
       filePath = (await text({
-        message: 'Provide the test suite file path',
+        message: 'Provide the test suite filepath',
         placeholder: './tests/.../...'
       })) as string;
+
+      if (isCancel(filePath)) {
+        process.exit(0);
+      }
+
+      if (!filePath) {
+        outro('filepath can not be empty');
+        process.exit(0);
+      }
     }
 
     readingFileSpinner.start('reading file');
