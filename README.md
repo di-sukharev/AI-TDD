@@ -6,7 +6,7 @@
     </h4>
   </div>
 	<h2>AI CLI for TDD — you write the test, AI makes it green ✅</h2>
-	<p>Prompting GPT with a test suite code makes it write code impressively accurate</p>
+	<p>Prompting GPT with a test suite makes it write code impressively accurate</p>
 	<a href="https://www.npmjs.com/package/ai-tdd"><img src="https://img.shields.io/npm/v/ai-tdd" alt="Current version"></a>
 </div>
 
