@@ -14,7 +14,7 @@
 
 ## Example
 
-Here is a frontend test suite written in [Jest](https://jestjs.io/) + [Testing Library](https://testing-library.com/). Yes, AI-TDD easily passes frontend tests:
+Here is a frontend test suite written in [Jest](https://jestjs.io/) + [Testing Library](https://testing-library.com/). Yes, AI-TDD easily passes even frontend tests:
 
 ```typescript
 import React from 'react';
