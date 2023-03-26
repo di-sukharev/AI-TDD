@@ -1,6 +1,6 @@
 <div align="center">
   <div>
-    <img src=".github/logo.svg" alt="ai-tdd logo"/>
+    <img src=".github/logo-sexy.svg" alt="ai-tdd logo"/>
     <h1 align="center">AI + TDD</h1>
     <h4 align="center">Follow the bird <a href="https://twitter.com/io_Y_oi"><img src="https://img.shields.io/twitter/follow/io_Y_oi?style=flat&label=io_Y_oi&logo=twitter&color=0bf&logoColor=fff" align="center"></a>
     </h4>
