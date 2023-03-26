@@ -17,7 +17,7 @@
     "ait": "./out/cli.cjs"
   },
   "repository": {
-    "url": "https://github.com/di-sukharev/ai-tdd"
+    "url": "https://github.com/di-sukharev/AI-TDD"
   },
   "type": "module",
   "author": "https://github.com/di-sukharev",
