@@ -6,11 +6,9 @@ import { homedir } from 'os';
 import { intro, outro } from '@clack/prompts';
 import chalk from 'chalk';
 import { COMMANDS } from '../CommandsEnum';
-import { getI18nLocal } from '../i18n';
 
 export enum CONFIG_KEYS {
   OPENAI_API_KEY = 'OPENAI_API_KEY',
-  language = 'language',
   model = 'model',
   maxTokens = 'maxTokens'
 }
@@ -49,21 +47,13 @@ export const configValidators = {
 
     return value;
   },
-  [CONFIG_KEYS.language](value: any) {
-    validateConfig(
-      CONFIG_KEYS.language,
-      getI18nLocal(value),
-      `${value} is not supported yet`
-    );
-    return getI18nLocal(value);
-  },
   [CONFIG_KEYS.model](value: any) {
     validateConfig(
       CONFIG_KEYS.model,
       ['gpt-4', 'gpt-3.5-turbo'].includes(value),
       `${value} model is not supported, use 'gpt-4' or 'gpt-3.5-turbo'`
     );
-    return getI18nLocal(value);
+    return value;
   },
   [CONFIG_KEYS.maxTokens](value: any) {
     validateConfig(
@@ -72,7 +62,7 @@ export const configValidators = {
       typeof value === 'number',
       `${value} model doesn't exist or is not supported`
     );
-    return getI18nLocal(value);
+    return value;
   }
 };
 
