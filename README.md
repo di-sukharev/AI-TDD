@@ -5,7 +5,7 @@
     <h4 align="center">Follow the bird <a href="https://twitter.com/io_Y_oi"><img src="https://img.shields.io/twitter/follow/io_Y_oi?style=flat&label=io_Y_oi&logo=twitter&color=0bf&logoColor=fff" align="center"></a>
     </h4>
   </div>
-	<h2>GPT4 powered CLI for TDD — you write the test, GPT makes it green ✅</h2>
+	<h2>GPT4 powered CLI for TDD — you write the test, GPT writes the code to pass it ✅</h2>
 	<p>Prompting GPT with a test suite makes it write code impressively accurate</p>
 	<a href="https://www.npmjs.com/package/ai-tdd"><img src="https://img.shields.io/npm/v/ai-tdd" alt="Current version"></a>
 </div>
