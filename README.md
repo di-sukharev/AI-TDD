@@ -124,7 +124,7 @@ export default Fetch;
 You can call AI-TDD like this:
 
 ```sh
-ai-tdd <test suite filepath...>
+aitdd <test suite filepath...>
 ```
 
 You can also call it via `ait` or `tdd` shortcuts:
