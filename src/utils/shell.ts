@@ -1,5 +1,5 @@
-export async function exe(args) {
-  const process = Bun.spawnSync(args);
+export async function exe(args: string[]) {
+  const process = Bun.spawn(args); // todo: consider async
 
   const stdout = await new Response(process.stdout).text();
   const error = await new Response(process.stderr).text();
