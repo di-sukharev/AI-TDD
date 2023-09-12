@@ -4,16 +4,17 @@ import { exe } from "./shell";
 
 export const assertGitRepo = async () => {
   try {
-    await exe(["git", "status"]);
+    const { exitCode, stderr } = await exe(["git", "status"]);
+    if (exitCode !== 0) throw new Error(stderr);
   } catch (error) {
-    throw new Error(error);
+    throw new Error(error as string);
   }
 };
 
 export const getIsGitRepo = async () => {
   try {
-    await exe(["git", "status"]);
-    return true;
+    const { exitCode } = await exe(["git", "status"]);
+    return exitCode !== 0 ? false : true;
   } catch (error) {
     return false;
   }
@@ -68,8 +69,9 @@ export const getIsGitRepo = async () => {
 export const getChangedFiles = async (): Promise<string[]> => {
   await assertGitRepo();
 
-  const { stdout: modified } = await execa("git", ["ls-files", "--modified"]);
-  const { stdout: others } = await execa("git", [
+  const { stdout: modified } = await exe(["git", "ls-files", "--modified"]);
+  const { stdout: others } = await exe([
+    "git",
     "ls-files",
     "--others",
     "--exclude-standard",
