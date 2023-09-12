@@ -1,10 +1,10 @@
+import { outro } from "@clack/prompts";
+
 export async function exe(args: string[]) {
-  const process = Bun.spawn(args); // todo: consider async
+  const proc = Bun.spawnSync(args);
 
-  const stdout = await new Response(process.stdout).text();
-  const error = await new Response(process.stderr).text();
+  const stdout = await new Response(proc.stdout).text();
+  const stderr = await new Response(proc.stderr).text();
 
-  if (process.exitCode !== 0) throw new Error(error);
-
-  return stdout;
+  return { stdout, stderr, exitCode: proc.exitCode };
 }
