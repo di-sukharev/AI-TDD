@@ -21,14 +21,12 @@ export const runCommand = command(
 
     const [testFilePath, testFilePathError] = await call(testFinder.find());
 
-    console.log(testFilePath, testFilePathError);
-
     if (testFilePathError) {
       outroError("Test file not found");
       process.exit(1);
     }
 
-    const MAX_ATTEMPTS = 5; // TODO: make tries configurable
+    const MAX_ATTEMPTS = 2; // TODO: make tries configurable
 
     let attempts = MAX_ATTEMPTS;
 
@@ -36,12 +34,12 @@ export const runCommand = command(
     while (!isTestPassing && attempts > 0) {
       const result = await testRunner.assert(testFilePath);
 
-      if (result.error) {
+      if (result.failed) {
         const clarifications = "";
 
         const filesToWrite = await testSolver.solve(
           testFilePath,
-          result.error,
+          result.message,
           clarifications
         );
 
@@ -58,9 +56,12 @@ export const runCommand = command(
       process.exit(0);
     } else {
       outroError(
-        `Failed to pass the test ${testFilePath} after ${MAX_ATTEMPTS} attempts. Consider simplifying the test.`
+        `Failed to pass the test ${testFilePath} after ${MAX_ATTEMPTS} attempt(s).`
       );
-      process.exit(1);
+
+      // TODO: try to solve the problem in an interactive conversation: ask questions, simplify test
+
+      process.exit(0);
     }
   }
 );
