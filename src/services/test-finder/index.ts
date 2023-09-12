@@ -44,22 +44,26 @@ class TestFinder {
 
     if (isCancel(selectedFilePath)) return process.exit(1);
 
-    if (!selectedFilePath) throw new Error("FILE_NOT_SELECTED");
+    if (!selectedFilePath) throw new Error("GIT_FILE_NOT_SELECTED");
 
     return selectedFilePath as string;
   }
 
-  private findAllTestFilesInGit() {}
+  private getCachedTestFiles() {}
 
   private async findTestFileByPath() {
     const testFilePath = await text({
       message: "Provide a test file path:",
       placeholder: "__tests__/path/to/your.test.file",
-      // initialValue: "42",
+      initialValue: "__tests__/dummy.test.ts",
       validate(value) {
         if (value.length === 0) return `Path is required`;
       },
     });
+
+    if (isCancel(testFilePath)) return process.exit(1);
+
+    if (!testFilePath) throw new Error("LOCAL_FILE_NOT_SELECTED");
 
     return testFilePath.toString();
   }
@@ -72,7 +76,7 @@ class TestFinder {
 
       return testFile;
     } catch (error) {
-      note("Could not find test files via git");
+      note(chalk.yellow("Could not find test files via git"));
       return await this.findTestFileByPath();
     }
   }

@@ -3,7 +3,7 @@
 */
 
 interface IContent {
-  target: string;
+  row: string;
   action: "replace" | "append" | "prepend";
   with: string;
 }
@@ -32,25 +32,26 @@ class FileManager {
     return text;
   }
 
+  // TODO: make this async write in place for better performance
   manipulateFileContent(currentContent: string, newContent: IContent) {
     const lines = currentContent.split("\n");
     const newLines: string[] = [];
-
     for (const line of lines) {
-      if (line.includes(newContent.target)) {
-        if (newContent.action === "replace") {
-          newLines.push(newContent.with);
-        } else if (newContent.action === "append") {
-          newLines.push(line);
-          newLines.push(newContent.with);
-        } else if (newContent.action === "prepend") {
-          newLines.push(newContent.with);
-          newLines.push(line);
-        } else {
-          throw new Error("UNKNOWN_CONTENT_ACTION");
-        }
+      if (!line.includes(newContent.row)) {
+        newLines.push(line);
+        continue;
+      }
+
+      if (newContent.action === "replace") {
+        newLines.push(newContent.with);
+      } else if (newContent.action === "append") {
+        newLines.push(line);
+        newLines.push(newContent.with);
+      } else if (newContent.action === "prepend") {
+        newLines.push(newContent.with);
+        newLines.push(line);
       } else {
-        throw new Error("NO_TARGET_FOUND");
+        throw new Error("UNKNOWN_CONTENT_ACTION");
       }
     }
 
@@ -67,13 +68,15 @@ class FileManager {
         currentContent,
         newContent
       );
-      this.writeFile(filePath, contentToWrite);
+
+      await this.writeFile(filePath, contentToWrite);
     }
   }
 
   async manage(files: FileToManipulate[]): Promise<void> {
-    for (const file of files)
-      this.writeFileContent(file.filePath, file.content);
+    await Promise.all(
+      files.map((file) => this.writeFileContent(file.filePath, file.content))
+    );
   }
 }
 
