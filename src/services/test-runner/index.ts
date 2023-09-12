@@ -2,14 +2,15 @@
     This service runs test(s)
 */
 
-import { execa } from "execa";
+import { note } from "@clack/prompts";
+import { exe } from "../../utils/shell";
 
 class TestRunner {
   private getRunCommand() {
     // how to run test? check config (e.g. package.json) for scripts.test
     // todo: find test runner
 
-    return "bun test";
+    return "bun test".split(" ");
   }
 
   getError(stdout: string) {
@@ -25,15 +26,25 @@ class TestRunner {
   async assert(testFilePath: string) {
     const runCommand = this.getRunCommand();
 
-    const result = await execa(runCommand, [testFilePath]);
+    try {
+      const { stdout, stderr, exitCode } = await exe([
+        ...runCommand,
+        testFilePath,
+      ]);
 
-    const failed = result.failed;
+      if (stderr) note(stderr);
 
-    return {
-      message: this.getMessage(result.stdout),
-      failed,
-      error: failed ? this.getError(result.stdout) : null,
-    };
+      return {
+        message: this.getMessage(stdout || stderr),
+        failed: exitCode !== 0,
+      };
+    } catch (error) {
+      console.log("REMOVE THIS BLOCK IF NOT CALLED");
+      return {
+        message: error as string,
+        failed: true,
+      };
+    }
   }
 }
 
