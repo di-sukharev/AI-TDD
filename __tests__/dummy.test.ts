@@ -3,9 +3,7 @@ import { expect, test, mock } from "bun:test";
 const random = mock((multiplier: number) => multiplier * Math.random());
 
 test("random", async () => {
-const a = random(1);
-random(1);
-random(1);
+  const a = random(1);
 
   expect(random).toHaveBeenCalled();
   expect(random).toHaveBeenCalledTimes(3);

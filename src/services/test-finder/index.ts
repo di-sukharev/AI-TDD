@@ -6,6 +6,7 @@ import { isCancel, note, select, text } from "@clack/prompts";
 import chalk from "chalk";
 import { assertGitRepo, getChangedFiles } from "../../utils/git";
 import { outroError } from "../../utils/prompts";
+import { exe } from "../../utils/shell";
 
 class TestFinder {
   private async getTestFilesInGit() {
@@ -50,6 +51,30 @@ class TestFinder {
   }
 
   private getCachedTestFiles() {}
+
+  private async getAllTestFiles() {
+    const { stdout } = await exe([
+      "find",
+      ".", // current dir
+
+      "-name",
+      '"node_modules"', // TODO: exclude other folders
+      "-prune",
+
+      "-o", // OR
+
+      "-name",
+      '"*test*"', // TODO: consider other names
+      "-print",
+
+      // not larger than 10MB
+      "-not",
+      "-size",
+      "+10M",
+    ]);
+
+    console.log(123123, { stdout });
+  }
 
   private async findTestFileByPath() {
     const testFilePath = await text({

@@ -7,6 +7,7 @@ import { testSolver } from "../services/test-solver";
 import { call } from "../utils/call";
 import { outroError, outroSuccess } from "../utils/prompts";
 import { COMMANDS } from "./enums";
+import { codeCrawler } from "../services/code-crawler";
 
 export const runCommand = command(
   {
@@ -37,8 +38,13 @@ export const runCommand = command(
       if (result.failed) {
         const clarifications = "";
 
+        const testRelevantFilePaths = await codeCrawler.findImportsInFile(
+          testFilePath
+        );
+
         const filesToWrite = await testSolver.solve(
           testFilePath,
+          testRelevantFilePaths,
           result.message,
           clarifications
         );

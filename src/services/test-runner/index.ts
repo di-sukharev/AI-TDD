@@ -19,7 +19,8 @@ class TestRunner {
   }
 
   getMessage(stdout: string) {
-    // TODO: extract any helpful message
+    // TODO: extract any helpful message, cut logs
+
     return stdout;
   }
 
@@ -39,7 +40,7 @@ class TestRunner {
         failed: exitCode !== 0,
       };
     } catch (error) {
-      console.log("REMOVE THIS BLOCK IF NOT CALLED");
+      console.log("REMOVE THIS BLOCK IF IT'S NOT BEING CALLED");
       return {
         message: error as string,
         failed: true,

@@ -20,13 +20,14 @@ export interface FileToAdjust {
 
 interface FileWithCode {
   path: string;
-  code: string;
+  code: string | null;
 }
 
 class TestSolver {
   // talk to user, ask for confirmations
 
   private getChatCompletionPrompt(
+    test: FileWithCode,
     files: FileWithCode[],
     error: string
   ): Array<OpenAI.Chat.ChatCompletionMessage> {
@@ -51,7 +52,7 @@ class TestSolver {
         content: [
           "Below is the test suite code:",
           "```",
-          "CODE",
+          test.code,
           "```",
           "",
           ...files.map((file) => [
@@ -71,10 +72,15 @@ class TestSolver {
   }
 
   private async getCodeToAdjustForFailingTest(
-    files: FileWithCode[],
+    testFile: FileWithCode,
+    testRelevantFiles: FileWithCode[],
     error: string
   ): Promise<FileToAdjust[]> {
-    const prompt = this.getChatCompletionPrompt(files, error);
+    const prompt = this.getChatCompletionPrompt(
+      testFile,
+      testRelevantFiles,
+      error
+    );
     const loader = spinner();
 
     try {
@@ -101,6 +107,7 @@ class TestSolver {
 
   async solve(
     testFilePath: string,
+    testRelevantFilePaths: string[],
     error: string,
     clarifications?: string
   ): Promise<FileToAdjust[]> {
@@ -110,8 +117,20 @@ class TestSolver {
 
     if (!testFileCode) throw new Error("FILE_NOT_FOUND");
 
+    const testRelevantFilesCode = await Promise.all(
+      testRelevantFilePaths.map((path) => fileManager.readFileContent(path))
+    );
+
+    const testRelevantFilesWithCode = testRelevantFilesCode.map((code, i) => ({
+      path: testRelevantFilePaths[i],
+      code,
+    }));
+
+    const testFileWithCode = { path: testFilePath, code: testFileCode };
+
     return await this.getCodeToAdjustForFailingTest(
-      [{ path: testFilePath, code: testFileCode }],
+      testFileWithCode,
+      testRelevantFilesWithCode,
       error
     );
   }
