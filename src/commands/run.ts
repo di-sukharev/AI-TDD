@@ -7,7 +7,7 @@ import { testSolver } from "../services/test-solver";
 import { call } from "../utils/call";
 import { outroError, outroSuccess } from "../utils/prompts";
 import { COMMANDS } from "./enums";
-import { codeNavigatorService } from "../services/code-crawler";
+import { codeNavigatorService } from "../services/code-navigator";
 
 export const runCommand = command(
   {
