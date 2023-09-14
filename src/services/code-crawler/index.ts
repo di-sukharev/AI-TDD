@@ -2,19 +2,21 @@
     This service searches (greps) the code occurrences
 */
 
-import { fileManager } from "../file-manager";
+import { exe } from "../../utils/shell";
+import { fileManagerService } from "../file-manager";
 
 interface FileImport {
   import: string;
   from: string;
 }
 
-type ImportOccurrence = {
+interface ImportOccurrence {
   row: string;
   from: string;
-};
+}
 
-class CodeCrawler {
+class CodeNavigatorService {
+  // TODO: use codeNavigatorAgent instead
   private extractImportsFromFile(fileContent: string) {
     // const get file extension with const [_, extension] = split(".")
 
@@ -44,27 +46,31 @@ class CodeCrawler {
       const items = importItems.split(",").map((item) => item.trim());
 
       // Create an object for each import item
-      items.forEach((item) => {
-        imports.push({
-          import: item,
-          from: importPath,
-        });
-      });
+      items.forEach((item) => imports.push({ import: item, from: importPath }));
     }
 
     return imports;
   }
 
-  private async extractCallsFromImports(filePaths: string) {
-    // const get file type with `type
-    // awk '/async findImportsInFile\(/ {flag=1;count=0} flag {print; if ($0 ~ /{/) count++; if ($0 ~ /}/) count--; if (count == 0) flag=0}' src/services/code-crawler/index.ts
+  // TODO: use codeNavigatorAgent instead
+  private async extractCallsFromImports(importOccurrences: ImportOccurrence[]) {
+    for (const occurrence of importOccurrences) {
+      const { stdout } = await exe([
+        "awk",
+        `'/${occurrence.from}\(/ {flag=1;count=0} flag {print; if ($0 ~ /{/) count++; if ($0 ~ /}/) count--; if (count == 0) flag=0}'`,
+        occurrence.row,
+      ]);
+
+      console.log({ stdout });
+    }
   }
 
+  // TODO: use codeNavigatorAgent instead
   private findImportOccurrences(imports: FileImport[], fileContent: string) {
     const occurrences: ImportOccurrence[] = [];
 
     for (const { import: importName, from: importPath } of imports) {
-      // Create a regex to find method calls or direct calls for this import
+      // TODO: simplify the regexp, to only catch line before \n
       const regex = new RegExp(
         `\\b${importName}(?:\\.[a-zA-Z0-9_]+)?\\([^)]*\\)`,
         "g"
@@ -84,18 +90,18 @@ class CodeCrawler {
   }
 
   async findImportsInFile(filePath: string) {
-    const fileContent = await fileManager.readFileContent(filePath);
-    console.log({ fileContent });
+    const fileContent = await fileManagerService.readFileContent(filePath);
+
     if (!fileContent) return null;
 
     const imports = this.extractImportsFromFile(fileContent);
-    console.log({ imports });
+
     const importsOccurrences = this.findImportOccurrences(imports, fileContent);
 
-    console.log({ importsOccurrences });
+    await this.extractCallsFromImports(importsOccurrences);
 
     return importsOccurrences;
   }
 }
 
-export const codeCrawler = new CodeCrawler();
+export const codeNavigatorService = new CodeNavigatorService();

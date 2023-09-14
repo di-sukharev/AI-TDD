@@ -1,13 +1,13 @@
 import { intro } from "@clack/prompts";
 import { command } from "cleye";
-import { fileManager } from "../services/file-manager";
-import { testFinder } from "../services/test-finder";
-import { testRunner } from "../services/test-runner";
+import { fileManagerService } from "../services/file-manager";
+import { testFinderService } from "../services/test-finder";
+import { testRunnerService } from "../services/test-runner";
 import { testSolver } from "../services/test-solver";
 import { call } from "../utils/call";
 import { outroError, outroSuccess } from "../utils/prompts";
 import { COMMANDS } from "./enums";
-import { codeCrawler } from "../services/code-crawler";
+import { codeNavigatorService } from "../services/code-crawler";
 
 export const runCommand = command(
   {
@@ -20,7 +20,9 @@ export const runCommand = command(
     // TODO: check latest version
     // TODO: check is initialized
 
-    const [testFilePath, testFilePathError] = await call(testFinder.find());
+    const [testFilePath, testFilePathError] = await call(
+      testFinderService.find()
+    );
 
     if (testFilePathError) {
       outroError("Test file not found");
@@ -33,14 +35,13 @@ export const runCommand = command(
 
     let isTestPassing = false;
     while (!isTestPassing && attempts > 0) {
-      const result = await testRunner.assert(testFilePath);
+      const result = await testRunnerService.assert(testFilePath);
 
       if (result.failed) {
         const clarifications = "";
 
-        const testRelevantFilePaths = await codeCrawler.findImportsInFile(
-          testFilePath
-        );
+        const testRelevantFilePaths =
+          await codeNavigatorService.findImportsInFile(testFilePath);
 
         const filesToWrite = await testSolver.solve(
           testFilePath,
@@ -49,7 +50,7 @@ export const runCommand = command(
           clarifications
         );
 
-        await fileManager.manage(filesToWrite);
+        await fileManagerService.manage(filesToWrite);
 
         attempts--;
       } else {

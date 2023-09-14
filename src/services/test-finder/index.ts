@@ -8,7 +8,7 @@ import { assertGitRepo, getChangedFiles } from "../../utils/git";
 import { outroError } from "../../utils/prompts";
 import { exe } from "../../utils/shell";
 
-class TestFinder {
+class TestFinderService {
   private async getTestFilesInGit() {
     try {
       const changedFiles = await getChangedFiles();
@@ -72,8 +72,6 @@ class TestFinder {
       "-size",
       "+10M",
     ]);
-
-    console.log(123123, { stdout });
   }
 
   private async findTestFileByPath() {
@@ -107,4 +105,4 @@ class TestFinder {
   }
 }
 
-export const testFinder = new TestFinder();
+export const testFinderService = new TestFinderService();

@@ -5,7 +5,7 @@
 import { note } from "@clack/prompts";
 import { exe } from "../../utils/shell";
 
-class TestRunner {
+class TestRunnerService {
   private getRunCommand() {
     // how to run test? check config (e.g. package.json) for scripts.test
     // todo: find test runner
@@ -49,4 +49,4 @@ class TestRunner {
   }
 }
 
-export const testRunner = new TestRunner();
+export const testRunnerService = new TestRunnerService();

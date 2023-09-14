@@ -13,7 +13,7 @@ interface FileToManipulate {
   content: IContent;
 }
 
-class FileManager {
+class FileManagerService {
   async createFile(filePath: string, content?: string) {
     await Bun.write(filePath, content ?? "");
   }
@@ -80,4 +80,4 @@ class FileManager {
   }
 }
 
-export const fileManager = new FileManager();
+export const fileManagerService = new FileManagerService();
