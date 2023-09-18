@@ -28,14 +28,7 @@ class TestSolverAgent {
         content: [
           "You are to write code that passes tests as per the Software TDD practice. I send you the test suite, and you write the code that passes it.",
           "DO NOT provide any explanations, strictly response with JSON in this format:",
-          `FilesToAdjust {
-        content: {
-          row: string;
-          action: "replace" | "append" | "prepend";
-          with: string;
-        };
-        filePath: string;
-      }[]`,
+          `{ filePath: string; content: { row: string; action: "replace" | "append" | "prepend"; with: string; }; }[]`,
         ].join("\n"),
       },
       {
@@ -47,13 +40,13 @@ class TestSolverAgent {
           "```",
           "",
           ...files.map((file) => [
-            `Below is the existing code for file ${file.path}`,
+            `This is the existing code for file ${file.path}`,
             "```",
             file.code,
             "```",
             "",
           ]),
-          "Below is the test suite stdout error:",
+          "Finally, this is the test suite stdout error:",
           "```",
           error,
           "```",
@@ -64,36 +57,35 @@ class TestSolverAgent {
 
   async callOpenAi(
     testFile: FileWithCode,
-    testRelevantFiles: FileWithCode[],
+    relevantFiles: FileWithCode[],
     error: string
   ) {
-    const prompt = this.getChatCompletionPrompt(
-      testFile,
-      testRelevantFiles,
-      error
-    );
+    const prompt = this.getChatCompletionPrompt(testFile, relevantFiles, error);
 
     const res = await OpenAiApi.createChatCompletion(prompt);
 
     return res;
   }
 
-  private async getCodeToAdjustForFailingTest(
-    testFile: FileWithCode,
-    testRelevantFiles: FileWithCode[],
-    error: string
-  ): Promise<CodeToWrite[]> {
+  private async getCodeToAdjustForFailingTest({
+    testFile,
+    relevantFiles,
+    error,
+  }: {
+    testFile: FileWithCode;
+    relevantFiles: FileWithCode[];
+    error: string;
+  }): Promise<CodeToWrite[]> {
     const loader = spinner();
 
     try {
-      loader.start("LLM is trying to solve the test");
-      const res = await this.callOpenAi(testFile, testRelevantFiles, error);
+      loader.start("LLM is solving the test");
+      const res = await this.callOpenAi(testFile, relevantFiles, error);
+      loader.stop("LLM got an idea, applying…");
 
       if (!res) {
         loader.stop("Something went wrong");
         return process.exit(1);
-      } else {
-        loader.stop("LLM got an idea, applying…");
       }
 
       const codeToAdjust = JSON.parse(res);
@@ -107,12 +99,20 @@ class TestSolverAgent {
     }
   }
 
-  async solve(
-    testFileCode: FileWithCode,
-    testRelevantFilesCode: FileWithCode[],
-    error: string
-  ) {
-    // write code here, use awk command
+  async solve({
+    testFile,
+    relevantFiles,
+    error,
+  }: {
+    testFile: FileWithCode;
+    relevantFiles: FileWithCode[];
+    error: string;
+  }) {
+    return await this.getCodeToAdjustForFailingTest({
+      testFile,
+      relevantFiles,
+      error,
+    });
   }
 }
 

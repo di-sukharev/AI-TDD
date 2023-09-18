@@ -6,12 +6,12 @@ import { exe } from "../../utils/shell";
 import { fileManagerService } from "../file-manager";
 
 interface FileImport {
-  import: string;
+  functionImport: string;
   from: string;
 }
 
-interface ImportOccurrence {
-  row: string;
+interface FunctionCalls {
+  calls: string[];
   from: string;
 }
 
@@ -46,61 +46,83 @@ class CodeNavigatorService {
       const items = importItems.split(",").map((item) => item.trim());
 
       // Create an object for each import item
-      items.forEach((item) => imports.push({ import: item, from: importPath }));
+      items.forEach((item) =>
+        imports.push({ functionImport: item, from: importPath })
+      );
     }
 
     return imports;
   }
 
-  // TODO: use codeNavigatorAgent instead
-  private async extractCallsFromImports(importOccurrences: ImportOccurrence[]) {
-    for (const occurrence of importOccurrences) {
-      const { stdout } = await exe([
-        "awk",
-        `'/${occurrence.from}\(/ {flag=1;count=0} flag {print; if ($0 ~ /{/) count++; if ($0 ~ /}/) count--; if (count == 0) flag=0}'`,
-        occurrence.row,
-      ]);
+  // TODO: not working
+  private async findFunctionDeclarations(fileImports: FileImport[]) {
+    const functionCalls: string[] = [];
 
-      console.log({ stdout });
-    }
-  }
-
-  // TODO: use codeNavigatorAgent instead
-  private findImportOccurrences(imports: FileImport[], fileContent: string) {
-    const occurrences: ImportOccurrence[] = [];
-
-    for (const { import: importName, from: importPath } of imports) {
-      // TODO: simplify the regexp, to only catch line before \n
-      const regex = new RegExp(
-        `\\b${importName}(?:\\.[a-zA-Z0-9_]+)?\\([^)]*\\)`,
-        "g"
+    for (const fileImport of fileImports) {
+      const regexpToMatchFunctionDeclarations = new RegExp(
+        `^.*${fileImport.functionImport}.*\\(.*\\).*{[\\s\\S]*?}\\s*$`,
+        "gm"
       );
 
+      const fileContent = await fileManagerService.readFileContent(
+        fileImport.from
+      );
+
+      if (!fileContent) continue;
+
       let match;
-      while ((match = regex.exec(fileContent)) !== null) {
+      while (
+        (match = regexpToMatchFunctionDeclarations.exec(fileContent)) !== null
+      ) {
         const [row] = match;
-        occurrences.push({
-          row,
-          from: importPath,
-        });
+        functionCalls.push(row);
       }
     }
-
-    return occurrences;
   }
 
-  async findImportsInFile(filePath: string) {
+  private findFunctionCalls(functionName: string, fileContent: string) {
+    const functionCalls: string[] = [];
+
+    const regexToMatchFunctionCalls = new RegExp(
+      `${functionName}(\\.\\w+)?\\([\\s\\S]*?\\)(?=\\s*\\/\\/|$)`,
+      "gm"
+    );
+
+    let match;
+    while ((match = regexToMatchFunctionCalls.exec(fileContent)) !== null) {
+      const [row] = match;
+      functionCalls.push(row);
+    }
+
+    return functionCalls;
+  }
+
+  async findImportsForFile(filePath: string) {
     const fileContent = await fileManagerService.readFileContent(filePath);
 
     if (!fileContent) return null;
 
     const imports = this.extractImportsFromFile(fileContent);
 
-    const importsOccurrences = this.findImportOccurrences(imports, fileContent);
+    return imports;
+  }
 
-    await this.extractCallsFromImports(importsOccurrences);
+  // TODO: not working
+  async findImportsDeclarationsForFile(filePath: string) {
+    const fileContent = await fileManagerService.readFileContent(filePath);
 
-    return importsOccurrences;
+    if (!fileContent) return null;
+
+    const imports = this.extractImportsFromFile(fileContent);
+
+    const functionCalls = imports.map(({ from, functionImport }) => ({
+      from,
+      calls: this.findFunctionCalls(functionImport, fileContent),
+    }));
+
+    const functionDeclarations = await this.findFunctionDeclarations(imports);
+
+    return functionDeclarations;
   }
 }
 

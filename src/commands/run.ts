@@ -38,17 +38,18 @@ export const runCommand = command(
       const result = await testRunnerService.assert(testFilePath);
 
       if (result.failed) {
-        const clarifications = "";
+        const clarifications = "TODO";
 
-        const testRelevantFilePaths =
-          await codeNavigatorService.findImportsInFile(testFilePath);
-
-        const filesToWrite = await testSolver.solve(
-          testFilePath,
-          testRelevantFilePaths,
-          result.message,
-          clarifications
+        const testRelevantFiles = await codeNavigatorService.findImportsForFile(
+          testFilePath
         );
+
+        const filesToWrite = await testSolver.solve({
+          testFilePath,
+          testRelevantFilePaths: testRelevantFiles?.map((file) => file.from),
+          error: result.message,
+          clarifications,
+        });
 
         await fileManagerService.manage(filesToWrite);
 
