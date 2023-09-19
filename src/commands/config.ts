@@ -15,7 +15,7 @@ export enum CONFIG_KEYS {
   AITDD_LANGUAGE = "AITDD_LANGUAGE",
 }
 
-export const DEFAULT_MODEL_TOKEN_LIMIT = 16_000;
+export const DEFAULT_MODEL_TOKEN_LIMIT = 28_000;
 
 enum CONFIG_COMMAND_MODES {
   get = "get",

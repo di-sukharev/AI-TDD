@@ -57,7 +57,7 @@ export const runCommand = command(
           clarifications,
         });
 
-        await note(`COMMAND:\n${(JSON.stringify(filesToWrite), undefined, 2)}`);
+        await note(`COMMAND:\n${JSON.stringify(filesToWrite)}`);
 
         const confirmExecution = await select({
           message: chalk.cyan(`Execute command?`),

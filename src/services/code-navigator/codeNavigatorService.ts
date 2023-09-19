@@ -121,12 +121,14 @@ class CodeNavigatorService {
     imports: FileImport[],
     relativePath: string
   ) {
+    // TODO: this is hardcoded
     return imports.map((imp) => ({
       name: imp.name,
       from:
         imp.from[0] === "."
           ? this.extractAbsolutePathFromFilePath(relativePath) +
-            imp.from.slice(1)
+            imp.from.slice(1) +
+            ".ts"
           : imp.from,
     }));
   }
