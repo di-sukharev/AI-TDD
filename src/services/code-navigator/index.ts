@@ -105,6 +105,35 @@ class CodeNavigatorService {
     return functionCalls;
   }
 
+  private extractAbsolutePathFromFilePath(filePath: string): string | null {
+    const folders = filePath.split("/");
+
+    if (!folders.length) return null;
+
+    const fileName = folders.pop();
+
+    if (!fileName) return null;
+
+    return folders.join("/");
+  }
+
+  private mapRelativeImportsToAbsolute(
+    imports: FileImport[],
+    relativePath: string
+  ) {
+    return imports.map((imp) => ({
+      name: imp.name,
+      from:
+        imp.from[0] === "."
+          ? this.extractAbsolutePathFromFilePath(relativePath) + "/"
+          : imp.from,
+    }));
+  }
+
+  private filterExternalImports(imports: FileImport[]) {
+    return imports.filter((imp) => imp.from.includes("src"));
+  }
+
   async findImportsForFile(filePath: string) {
     const fileContent = await fileManagerService.readFileContent(filePath);
 
@@ -112,7 +141,14 @@ class CodeNavigatorService {
 
     const imports = this.extractImportsFromFile(fileContent);
 
-    return imports;
+    const absoluteImports = this.mapRelativeImportsToAbsolute(
+      imports,
+      filePath
+    );
+
+    const filteredImports = this.filterExternalImports(imports);
+
+    return filteredImports;
   }
 
   // TODO: not working yet

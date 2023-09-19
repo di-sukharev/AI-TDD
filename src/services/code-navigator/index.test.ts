@@ -44,8 +44,6 @@ test("gets .js file path, extracts imported modules as paths and reads content o
       filePath
     );
 
-  console.log({ importedFunctionDeclarations });
-
   expect(importedFunctionDeclarations).toMatchObject([
     {
       ...imports,

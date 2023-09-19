@@ -1,4 +1,4 @@
-import { intro, isCancel, select } from "@clack/prompts";
+import { intro, isCancel, note, select } from "@clack/prompts";
 import { command } from "cleye";
 import { fileManagerService } from "../services/file-manager";
 import { testFinderService } from "../services/test-finder";
@@ -46,27 +46,29 @@ export const runCommand = command(
           testFilePath
         );
 
+        const testRelevantFilePaths = testRelevantFiles?.map(
+          (file) => file.from
+        );
+
         const filesToWrite = await testSolver.solve({
           testFilePath,
-          testRelevantFilePaths: testRelevantFiles?.map((file) => file.from),
+          testRelevantFilePaths,
           error: result.message,
           clarifications,
         });
 
+        await note(`COMMAND:\n${(JSON.stringify(filesToWrite), undefined, 2)}`);
+
         const confirmExecution = await select({
-          message: chalk.cyan(`Execute command?\n\n${filesToWrite}`),
+          message: chalk.cyan(`Execute command?`),
           options: [
             { value: true, label: "YES 🪩" },
-            { value: true, label: "NO 🚫" },
+            { value: false, label: "NO 🚫" },
           ],
         });
 
-        console.log({ confirmExecution });
-
         if (isCancel(confirmExecution) || !confirmExecution)
           return process.exit(1);
-
-        return process.exit(1);
 
         await fileManagerService.manage(filesToWrite);
 
