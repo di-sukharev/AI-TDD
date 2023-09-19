@@ -16,42 +16,49 @@ interface FunctionCalls {
 }
 
 class CodeNavigatorService {
-  private extractImportsFromFile(fileContent: string) {
+  private extractImportsFromFile(code: string) {
     // const get file extension with `const [_, extension] = split(".")` and adapt for java, rust, go, kotlin.
 
-    const ESM_REGEX = /import\s+{([^}]+)}\s+from\s+['"]([^'"]+)['"]/g;
     const COMMONJS_REGEX =
       /const\s+{([^}]+)}\s+=\s+require\s*\(['"]([^'"]+)['"]\)/g;
+    const ESM_REGEX =
+      /import\s+(?:(\*\s+as\s+)?([a-zA-Z0-9_$]+)|{([^}]+)})?\s+from\s+['"]([^'"]+)['"]/g;
 
-    const imports: FileImport[] = [];
+    const matches: FileImport[] = [];
 
-    const module = "ESM";
+    const moduleConfiguration = "ESM";
 
     let regex;
-    if (module === "ESM") {
+    if (moduleConfiguration === "ESM") {
       regex = ESM_REGEX;
-    } else if (module === "CommonJS") {
+    } else if (moduleConfiguration === "CommonJS") {
       regex = COMMONJS_REGEX;
     } else {
       throw new Error("Invalid module type");
     }
 
     let match;
-    while ((match = regex.exec(fileContent)) !== null) {
-      const importItems = match[1];
-      const importPath = match[2];
 
-      const items = importItems.split(",").map((item) => item.trim());
+    while ((match = regex.exec(code)) !== null) {
+      const [_full, _as, name, multipleNames, from] = match;
 
-      items.forEach((item) => imports.push({ name: item, from: importPath }));
+      const imports = multipleNames
+        ? multipleNames.split(",").map((str) => str.trim())
+        : [name];
+
+      imports.forEach((name) => {
+        if (name) {
+          matches.push({ name, from });
+        }
+      });
     }
 
-    return imports;
+    return matches;
   }
 
   // TODO: not working
   private async findFunctionDeclarations(fileImports: FileImport[]) {
-    const functionCalls: string[] = [];
+    const declarations: (FileImport & { declaration: string })[] = [];
 
     for (const fileImport of fileImports) {
       const regexpToMatchFunctionDeclarations = new RegExp(
@@ -70,10 +77,14 @@ class CodeNavigatorService {
         (match = regexpToMatchFunctionDeclarations.exec(fileContent)) !== null
       ) {
         const [row] = match;
-        functionCalls.push(row);
+        declarations.push({
+          from: fileImport.from,
+          name: fileImport.name,
+          declaration: row,
+        });
       }
 
-      return functionCalls;
+      return declarations;
     }
   }
 

@@ -1,4 +1,4 @@
-import { intro } from "@clack/prompts";
+import { intro, isCancel, select } from "@clack/prompts";
 import { command } from "cleye";
 import { fileManagerService } from "../services/file-manager";
 import { testFinderService } from "../services/test-finder";
@@ -8,6 +8,7 @@ import { call } from "../utils/call";
 import { outroError, outroSuccess } from "../utils/prompts";
 import { COMMANDS } from "./enums";
 import { codeNavigatorService } from "../services/code-navigator";
+import chalk from "chalk";
 
 export const runCommand = command(
   {
@@ -51,6 +52,21 @@ export const runCommand = command(
           error: result.message,
           clarifications,
         });
+
+        const confirmExecution = await select({
+          message: chalk.cyan(`Execute command?\n\n${filesToWrite}`),
+          options: [
+            { value: true, label: "YES 🪩" },
+            { value: true, label: "NO 🚫" },
+          ],
+        });
+
+        console.log({ confirmExecution });
+
+        if (isCancel(confirmExecution) || !confirmExecution)
+          return process.exit(1);
+
+        return process.exit(1);
 
         await fileManagerService.manage(filesToWrite);
 

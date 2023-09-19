@@ -1,5 +1,5 @@
 import { expect, test, mock } from "bun:test";
-import { unlinkSync } from "node:fs";
+import { unlink } from "node:fs/promises";
 
 import { codeNavigatorService } from ".";
 
@@ -17,15 +17,15 @@ test("gets .js file path, extracts imported modules as paths and reads content o
     },
   ];
 
-  for (const file of imports) {
+  for (const func of imports) {
     await Bun.write(
-      file.from,
-      `function ${file.name}({arg1, arg2}) {
-          const a = 1;
-          const b = 2;
+      func.from,
+      `function ${func.name}({arg1, arg2}) {
+        const a = 1;
+        const b = 2;
 
-          return true;
-      }`
+        return true;
+    }`
     );
   }
 
@@ -34,7 +34,7 @@ test("gets .js file path, extracts imported modules as paths and reads content o
     [
       ...imports.map((imp) => `import ${imp.name} from "${imp.from}"`),
       `function init() {
-        const response = SomeService({arg1: "test", arg2: 2});
+        const response = ${imports[0].name}({arg1: "test", arg2: 2});
       }`,
     ].join("\n")
   );
@@ -44,8 +44,21 @@ test("gets .js file path, extracts imported modules as paths and reads content o
       filePath
     );
 
-  expect(importedFunctionDeclarations).toMatchObject([]);
+  console.log({ importedFunctionDeclarations });
 
-  // delete the file
-  unlinkSync(filePath);
+  expect(importedFunctionDeclarations).toMatchObject([
+    {
+      ...imports,
+      declaration: `function ${imports[0].name}({arg1, arg2}) {
+    const a = 1;
+    const b = 2;
+
+    return true;
+}`,
+    },
+  ]);
+
+  // delete all files in the sandbox
+  await unlink(filePath);
+  for (const func of imports) await unlink(func.from);
 });
