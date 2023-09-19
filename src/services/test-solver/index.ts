@@ -33,10 +33,8 @@ class TestSolverService {
         )
       : [];
 
-    const testFileWithCode = { path: testFilePath, code: testFileCode };
-
     const filesToWrite = await testSolverAgent.solve({
-      testFile: testFileWithCode,
+      testFile: { path: testFilePath, code: testFileCode },
       relevantFiles: testRelevantFilesCode,
       error,
     });

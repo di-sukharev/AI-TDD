@@ -6,7 +6,7 @@ import { exe } from "../../utils/shell";
 import { fileManagerService } from "../file-manager";
 
 interface FileImport {
-  functionImport: string;
+  name: string;
   from: string;
 }
 
@@ -16,9 +16,8 @@ interface FunctionCalls {
 }
 
 class CodeNavigatorService {
-  // TODO: use codeNavigatorAgent instead
   private extractImportsFromFile(fileContent: string) {
-    // const get file extension with const [_, extension] = split(".")
+    // const get file extension with `const [_, extension] = split(".")` and adapt for java, rust, go, kotlin.
 
     const ESM_REGEX = /import\s+{([^}]+)}\s+from\s+['"]([^'"]+)['"]/g;
     const COMMONJS_REGEX =
@@ -26,7 +25,7 @@ class CodeNavigatorService {
 
     const imports: FileImport[] = [];
 
-    const module = "ESM"; // Change this to "CommonJS" for CommonJS modules
+    const module = "ESM";
 
     let regex;
     if (module === "ESM") {
@@ -42,13 +41,9 @@ class CodeNavigatorService {
       const importItems = match[1];
       const importPath = match[2];
 
-      // Split the import items and trim each one
       const items = importItems.split(",").map((item) => item.trim());
 
-      // Create an object for each import item
-      items.forEach((item) =>
-        imports.push({ functionImport: item, from: importPath })
-      );
+      items.forEach((item) => imports.push({ name: item, from: importPath }));
     }
 
     return imports;
@@ -60,7 +55,7 @@ class CodeNavigatorService {
 
     for (const fileImport of fileImports) {
       const regexpToMatchFunctionDeclarations = new RegExp(
-        `^.*${fileImport.functionImport}.*\\(.*\\).*{[\\s\\S]*?}\\s*$`,
+        `^.*${fileImport.name}.*\\(.*\\).*{[\\s\\S]*?}\\s*$`,
         "gm"
       );
 
@@ -77,6 +72,8 @@ class CodeNavigatorService {
         const [row] = match;
         functionCalls.push(row);
       }
+
+      return functionCalls;
     }
   }
 
@@ -107,17 +104,17 @@ class CodeNavigatorService {
     return imports;
   }
 
-  // TODO: not working
-  async findImportsDeclarationsForFile(filePath: string) {
+  // TODO: not working yet
+  async findImportedFunctionDeclarationsForFile(filePath: string) {
     const fileContent = await fileManagerService.readFileContent(filePath);
 
     if (!fileContent) return null;
 
     const imports = this.extractImportsFromFile(fileContent);
 
-    const functionCalls = imports.map(({ from, functionImport }) => ({
+    const functionCalls = imports.map(({ from, name }) => ({
       from,
-      calls: this.findFunctionCalls(functionImport, fileContent),
+      calls: this.findFunctionCalls(name, fileContent),
     }));
 
     const functionDeclarations = await this.findFunctionDeclarations(imports);

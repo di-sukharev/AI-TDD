@@ -38,7 +38,8 @@ export const runCommand = command(
       const result = await testRunnerService.assert(testFilePath);
 
       if (result.failed) {
-        const clarifications = "TODO";
+        const clarifications =
+          "TODO: any apis to call, any file that can be used as an example?";
 
         const testRelevantFiles = await codeNavigatorService.findImportsForFile(
           testFilePath

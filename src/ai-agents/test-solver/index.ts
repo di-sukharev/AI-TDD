@@ -34,7 +34,7 @@ class TestSolverAgent {
       {
         role: "user",
         content: [
-          "Below is the test suite code:",
+          `Below is the code for the test file ${test.path}`,
           "```",
           test.code,
           "```",
@@ -46,7 +46,7 @@ class TestSolverAgent {
             "```",
             "",
           ]),
-          "Finally, this is the test suite stdout error:",
+          "This is the test suite stdout error:",
           "```",
           error,
           "```",
@@ -61,6 +61,8 @@ class TestSolverAgent {
     error: string
   ) {
     const prompt = this.getChatCompletionPrompt(testFile, relevantFiles, error);
+
+    console.log({ prompt });
 
     const res = await OpenAiApi.createChatCompletion(prompt);
 
