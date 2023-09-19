@@ -24,6 +24,8 @@ class TestSolverService {
 
     if (!testFileCode) throw new Error("FILE_NOT_FOUND");
 
+    console.log({ testRelevantFilePaths });
+
     const testRelevantFilesCode = testRelevantFilePaths
       ? await Promise.all(
           testRelevantFilePaths.map(async (path) => ({

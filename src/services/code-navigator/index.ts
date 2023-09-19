@@ -146,7 +146,7 @@ class CodeNavigatorService {
       filePath
     );
 
-    const filteredImports = this.filterExternalImports(imports);
+    const filteredImports = this.filterExternalImports(absoluteImports);
 
     return filteredImports;
   }
