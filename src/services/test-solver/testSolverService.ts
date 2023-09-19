@@ -4,7 +4,7 @@
 
 import { testSolverAgent } from "../../ai-agents/test-solver";
 import { CodeToWrite } from "../../types";
-import { fileManagerService } from "../file-manager";
+import { fileManagerService } from "../file-manager/fileManagerService";
 
 class TestSolverService {
   async solve({

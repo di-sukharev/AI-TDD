@@ -1,13 +1,13 @@
 import { intro, isCancel, note, select } from "@clack/prompts";
 import { command } from "cleye";
-import { fileManagerService } from "../services/file-manager";
-import { testFinderService } from "../services/test-finder";
-import { testRunnerService } from "../services/test-runner";
-import { testSolver } from "../services/test-solver";
+import { fileManagerService } from "../services/file-manager/fileManagerService";
+import { testFinderService } from "../services/test-finder/testFinderService";
+import { testRunnerService } from "../services/test-runner/testRunnerService";
+import { testSolver } from "../services/test-solver/testSolverService";
 import { call } from "../utils/call";
 import { outroError, outroSuccess } from "../utils/prompts";
 import { COMMANDS } from "./enums";
-import { codeNavigatorService } from "../services/code-navigator";
+import { codeNavigatorService } from "../services/code-navigator/codeNavigatorService";
 import chalk from "chalk";
 
 export const runCommand = command(

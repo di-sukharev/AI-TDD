@@ -3,7 +3,7 @@
 */
 
 import { exe } from "../../utils/shell";
-import { fileManagerService } from "../file-manager";
+import { fileManagerService } from "../file-manager/fileManagerService";
 
 interface FileImport {
   name: string;
@@ -125,7 +125,8 @@ class CodeNavigatorService {
       name: imp.name,
       from:
         imp.from[0] === "."
-          ? this.extractAbsolutePathFromFilePath(relativePath) + "/"
+          ? this.extractAbsolutePathFromFilePath(relativePath) +
+            imp.from.slice(1)
           : imp.from,
     }));
   }

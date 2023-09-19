@@ -1,7 +1,7 @@
 import { expect, test, mock } from "bun:test";
 import { unlink } from "node:fs/promises";
 
-import { codeNavigatorService } from ".";
+import { codeNavigatorService } from "./codeNavigatorService";
 
 test("gets .js file path, extracts imported modules as paths and reads content of the imported modules, skips imports that are not being called", async () => {
   const filePath = "__tests__/sandbox/dummy-file.js";
