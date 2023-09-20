@@ -56,7 +56,6 @@ test("gets .js file path, extracts imported modules as paths and reads content o
     },
   ]);
 
-  // delete all files in the sandbox
   await unlink(filePath);
   for (const func of imports) await unlink(func.from);
 });

@@ -13,7 +13,7 @@ enum ERRORS {
 
 // TODO: const config = getConfig();
 
-const MAX_TOKENS = 2000;
+const MAX_TOKENS = 5_000;
 const OPENAI_API_KEY = Bun.env.OPENAI_API_KEY;
 
 if (!OPENAI_API_KEY) {
@@ -50,10 +50,11 @@ async function createChatCompletion(
   const params = {
     model: MODEL,
     messages,
-    temperature: 0,
+    temperature: 1,
     top_p: 0.1,
     max_tokens: MAX_TOKENS,
   };
+
   try {
     // const REQUEST_TOKENS = messages
     //   .filter((msg) => msg.content)
