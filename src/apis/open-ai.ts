@@ -18,7 +18,7 @@ const OPENAI_API_KEY = Bun.env.OPENAI_API_KEY;
 
 if (!OPENAI_API_KEY) {
   outro(
-    "AITDD_OPENAI_API_KEY is not set, please run `aitdd config set AITDD_OPENAI_API_KEY=<your token>. Make sure you add payment details, so API works.`"
+    "OPENAI_API_KEY is not set, please run `aitdd config set OPENAI_API_KEY=<your token>. Make sure you add payment details, so API works.`"
   );
   outro(
     "For help look into README https://github.com/di-sukharev/ai-tdd#setup"
@@ -31,7 +31,7 @@ if (!OPENAI_API_KEY) {
 //   intro("ai-tdd");
 
 //   outro(
-//     "AITDD_OPENAI_API_KEY is not set, please run `aitdd config set AITDD_OPENAI_API_KEY=<your token>. Make sure you add payment details, so API works.`"
+//     "OPENAI_API_KEY is not set, please run `aitdd config set OPENAI_API_KEY=<your token>. Make sure you add payment details, so API works.`"
 //   );
 //   outro(
 //     "For help look into README https://github.com/di-sukharev/ai-tdd#setup"

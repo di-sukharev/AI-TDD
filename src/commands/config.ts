@@ -10,9 +10,9 @@ import { getI18nLocal } from "../i18n";
 import { COMMANDS } from "./enums";
 
 export enum CONFIG_KEYS {
-  AITDD_OPENAI_API_KEY = "AITDD_OPENAI_API_KEY",
-  AITDD_MODEL = "AITDD_MODEL",
-  AITDD_LANGUAGE = "AITDD_LANGUAGE",
+  OPENAI_API_KEY = "OPENAI_API_KEY",
+  MODEL = "MODEL",
+  LANGUAGE = "LANGUAGE",
 }
 
 export const DEFAULT_MODEL_TOKEN_LIMIT = 32_000;
@@ -35,10 +35,10 @@ const validateConfig = (
 };
 
 export const configValidators = {
-  [CONFIG_KEYS.AITDD_OPENAI_API_KEY](value: any, config?: any) {
-    validateConfig(CONFIG_KEYS.AITDD_OPENAI_API_KEY, value, "Cannot be empty");
+  [CONFIG_KEYS.OPENAI_API_KEY](value: any, config?: any) {
+    validateConfig(CONFIG_KEYS.OPENAI_API_KEY, value, "Cannot be empty");
     validateConfig(
-      CONFIG_KEYS.AITDD_OPENAI_API_KEY,
+      CONFIG_KEYS.OPENAI_API_KEY,
       value.startsWith("sk-"),
       'Must start with "sk-"'
     );
@@ -46,18 +46,18 @@ export const configValidators = {
     return value;
   },
 
-  [CONFIG_KEYS.AITDD_LANGUAGE](value: any) {
+  [CONFIG_KEYS.LANGUAGE](value: any) {
     validateConfig(
-      CONFIG_KEYS.AITDD_LANGUAGE,
+      CONFIG_KEYS.LANGUAGE,
       getI18nLocal(value),
       `${value} is not supported yet`
     );
     return getI18nLocal(value);
   },
 
-  [CONFIG_KEYS.AITDD_MODEL](value: any) {
+  [CONFIG_KEYS.MODEL](value: any) {
     validateConfig(
-      CONFIG_KEYS.AITDD_MODEL,
+      CONFIG_KEYS.MODEL,
       [
         "gpt-3.5-turbo",
         "gpt-4",
@@ -78,19 +78,18 @@ const configPath = pathJoin(homedir(), ".aitdd");
 
 export const getConfig = (): ConfigType | null => {
   const configFromEnv = {
-    AITDD_OPENAI_API_KEY: process.env.AITDD_OPENAI_API_KEY,
-    AITDD_OPENAI_MAX_TOKENS: process.env.AITDD_OPENAI_MAX_TOKENS
-      ? Number(process.env.AITDD_OPENAI_MAX_TOKENS)
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    OPENAI_MAX_TOKENS: process.env.OPENAI_MAX_TOKENS
+      ? Number(process.env.OPENAI_MAX_TOKENS)
       : undefined,
-    AITDD_OPENAI_BASE_PATH: process.env.AITDD_OPENAI_BASE_PATH,
-    AITDD_DESCRIPTION: process.env.AITDD_DESCRIPTION === "true" ? true : false,
-    AITDD_EMOJI: process.env.AITDD_EMOJI === "true" ? true : false,
-    AITDD_MODEL: process.env.AITDD_MODEL || "gpt-3.5-turbo-16k",
-    AITDD_LANGUAGE: process.env.AITDD_LANGUAGE || "en",
-    AITDD_MESSAGE_TEMPLATE_PLACEHOLDER:
-      process.env.AITDD_MESSAGE_TEMPLATE_PLACEHOLDER || "$msg",
-    AITDD_PROMPT_MODULE:
-      process.env.AITDD_PROMPT_MODULE || "conventional-commit",
+    OPENAI_BASE_PATH: process.env.OPENAI_BASE_PATH,
+    DESCRIPTION: process.env.DESCRIPTION === "true" ? true : false,
+    EMOJI: process.env.EMOJI === "true" ? true : false,
+    MODEL: process.env.MODEL || "gpt-3.5-turbo-16k",
+    LANGUAGE: process.env.LANGUAGE || "en",
+    MESSAGE_TEMPLATE_PLACEHOLDER:
+      process.env.MESSAGE_TEMPLATE_PLACEHOLDER || "$msg",
+    PROMPT_MODULE: process.env.PROMPT_MODULE || "conventional-commit",
   };
 
   const configExists = existsSync(configPath);
@@ -117,7 +116,7 @@ export const getConfig = (): ConfigType | null => {
       config[configKey] = validValue;
     } catch (error) {
       outro(
-        `'${configKey}' name is invalid, it should be either 'AITDD_${configKey.toUpperCase()}' or it doesn't exist.`
+        `'${configKey}' name is invalid, it should be either '${configKey.toUpperCase()}' or it doesn't exist.`
       );
       outro(`Manually fix the '.env' file or global '~/.ai-tdd' config file.`);
       process.exit(1);
