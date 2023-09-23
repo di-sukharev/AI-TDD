@@ -30,7 +30,7 @@ export const runCommand = command(
       process.exit(1);
     }
 
-    const MAX_ATTEMPTS = 2; // TODO: make tries configurable
+    const MAX_ATTEMPTS = 10; // TODO: make tries configurable
 
     let attempts = MAX_ATTEMPTS;
 
