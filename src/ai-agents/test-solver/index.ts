@@ -20,7 +20,12 @@ class TestSolverAgent {
           "```",
           `{ filePath: string; content: { row: string; action: "replace" | "append" | "prepend"; with: string; }; }[]`,
           "```",
-          "Where: 'row' is not a line number, but the actual line of code.",
+          "Where:",
+          "'row' is not a line number but the actual line of code,",
+          "'append' action appends to the 'row', 'replace' replaces the non-empty-string row, and 'prepend' the 'with' code prepends before the row.",
+          "and 'filePath' is an absolute file path relative to the test file path, so if test path is 'src/__tests__/file.test.ts' then import should be relative to that path, e.g. 'src/__tests__/<your_file>'.",
+          "",
+          "You must not leave TODO code, generate production ready code.",
         ].join("\n"),
       },
       {
