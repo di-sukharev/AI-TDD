@@ -25,7 +25,9 @@ class FileManagerService {
   async readFileContent(filePath: string): Promise<string | null> {
     const file = Bun.file(filePath);
 
-    if (!file.exists) return null;
+    const isFileExists = await file.exists();
+
+    if (!isFileExists) return null;
 
     const text = await file.text();
 
@@ -62,7 +64,7 @@ class FileManagerService {
     const currentContent = await this.readFileContent(filePath);
 
     if (!currentContent) {
-      this.createFile(filePath, newContent.with);
+      await this.createFile(filePath, newContent.with);
     } else {
       const contentToWrite = this.manipulateFileContent(
         currentContent,
