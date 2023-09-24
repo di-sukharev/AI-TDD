@@ -1,3 +1,5 @@
+import fs from "node:fs/promises";
+
 /*
     This service manipulates the code in current repo: replaces, prepends, appends lines
 */
@@ -15,7 +17,19 @@ interface FileToManipulate {
 
 class FileManagerService {
   async createFile(filePath: string, content?: string) {
-    await Bun.write(filePath, content ?? "");
+    try {
+      await Bun.write(filePath, content ?? "");
+    } catch (error: any) {
+      // directory does not exist
+      if (error.code === "ENOENT") {
+        const filePathParts = filePath.split("/");
+        const _fileName = filePathParts.pop();
+        const directory = filePathParts.join("/");
+        console.log({ filePathParts, directory, _fileName });
+        await fs.mkdir(directory);
+        await this.createFile(filePath, content);
+      }
+    }
   }
 
   async writeFile(filePath: string, content: string) {

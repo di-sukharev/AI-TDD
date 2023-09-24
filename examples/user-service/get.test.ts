@@ -1,6 +1,5 @@
-// api.test.mjs
 import { expect, test, mock } from "bun:test";
-import UserService from "src/examples/userService";
+import UserService from "examples/user-service/userService";
 
 const users = [{ id: 1, name: "John Doe", email: "john.doe@example.com" }];
 

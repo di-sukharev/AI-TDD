@@ -1,5 +1,8 @@
 {
   "compilerOptions": {
+    "baseUrl": "./",
+
+    "paths": { "src/*": ["./src/*"], "examples/*": ["./examples/*"] },
     // add Bun type definitions
     "types": ["bun-types"],
 

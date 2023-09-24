@@ -78,7 +78,7 @@ class TestFinderService {
     const testFilePath = await text({
       message: "Provide a test file path:",
       placeholder: "__tests__/path/to/your.test.file",
-      initialValue: "__tests__/dummy.test.ts",
+      initialValue: "__tests__/examples/crud/get.test.ts",
       validate(value) {
         if (value.length === 0) return `Path is required`;
       },
