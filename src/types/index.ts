@@ -11,5 +11,5 @@ export interface CodeToWrite {
 
 export interface FileWithCode {
   path: string;
-  code: string | null;
+  code: string;
 }

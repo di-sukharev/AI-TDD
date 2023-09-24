@@ -1,9 +1,17 @@
-import { expect, test, mock } from "bun:test";
+import { afterAll, beforeAll, expect, test } from "bun:test";
 import UserService from "examples/user-service/userService";
+import { unlink } from "fs/promises";
+import * as fs from "fs";
 
 const users = [{ id: 1, name: "John Doe", email: "john.doe@example.com" }];
 
-UserService.findById = mock((id) => users.find((user) => user.id === id));
+beforeAll(async () => {
+  await Bun.write("examples/user-service/user-db.json", JSON.stringify(users));
+});
+
+afterAll(async () => {
+  await unlink("examples/user-service/user-db.json");
+});
 
 test("should find user in UserService", async () => {
   const user = await UserService.findUser({ id: 1 });

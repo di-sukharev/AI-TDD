@@ -107,12 +107,12 @@ class TestSolverAgent {
     error,
   }: {
     testFile: FileWithCode;
-    relevantFiles: FileWithCode[];
+    relevantFiles?: FileWithCode[];
     error: string;
   }) {
     return await this.getCodeToAdjustForFailingTest({
       testFile,
-      relevantFiles,
+      relevantFiles: relevantFiles || [],
       error,
     });
   }

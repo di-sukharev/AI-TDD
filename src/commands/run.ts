@@ -42,17 +42,23 @@ export const runCommand = command(
         const clarifications =
           "TODO: any apis to call, any file that can be used as an example?";
 
-        const testRelevantFiles = await codeNavigatorService.findImportsForFile(
-          testFilePath
+        const testRelevantFiles =
+          await codeNavigatorService.findImportDeclarationsForFile(
+            testFilePath
+          );
+
+        const testRelevantFilesWithDeclarations = testRelevantFiles?.filter(
+          (file) =>
+            Boolean(file.declarations) &&
+            file.declarations?.length &&
+            file.declarations
         );
 
-        const testRelevantFilePaths = testRelevantFiles?.map(
-          (file) => file.from
-        );
+        // return process.exit(1);
 
         const filesToWrite = await testSolver.solve({
           testFilePath,
-          testRelevantFilePaths,
+          testRelevantFiles: testRelevantFilesWithDeclarations as any,
           error: result.message,
           clarifications,
         });

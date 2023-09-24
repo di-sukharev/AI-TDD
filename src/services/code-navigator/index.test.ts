@@ -40,9 +40,7 @@ test("gets .js file path, extracts imported modules as paths and reads content o
   );
 
   const importedFunctionDeclarations =
-    await codeNavigatorService.findImportedFunctionDeclarationsForFile(
-      filePath
-    );
+    await codeNavigatorService.findImportDeclarationsForFile(filePath);
 
   expect(importedFunctionDeclarations).toMatchObject([
     {

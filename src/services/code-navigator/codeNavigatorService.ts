@@ -2,6 +2,7 @@
     This service searches (greps) the code occurrences
 */
 
+import path from "path/posix";
 import { exe } from "../../utils/shell";
 import { fileManagerService } from "../file-manager/fileManagerService";
 
@@ -12,34 +13,43 @@ interface FileImport {
 
 interface FunctionCalls {
   calls: string[];
-  from: string;
+  name: string;
 }
 
+type SUPPORTED_LANGUAGES = "js" | "ts";
+
 class CodeNavigatorService {
-  private extractImportsFromFile(code: string) {
-    // const get file extension with `const [_, extension] = split(".")` and adapt for java, rust, go, kotlin.
+  private extractImportsFromFileJSTS() {
+    const moduleConfiguration = "ESM"; // TODO: make configurable
 
     const COMMONJS_REGEX =
       /const\s+{([^}]+)}\s+=\s+require\s*\(['"]([^'"]+)['"]\)/g;
     const ESM_REGEX =
       /import\s+(?:(\*\s+as\s+)?([a-zA-Z0-9_$]+)|{([^}]+)})?\s+from\s+['"]([^'"]+)['"]/g;
 
+    return moduleConfiguration === "ESM" ? ESM_REGEX : COMMONJS_REGEX;
+  }
+
+  private async extractImportsFromFile(filePath: string) {
+    const fileContent = await fileManagerService.readFileContent(filePath);
+    if (!fileContent) return null;
+
+    const fileExtension = path.extname(filePath).replace(".", "");
+
+    const extToRegexp: Record<SUPPORTED_LANGUAGES, RegExp | (() => RegExp)> = {
+      js: this.extractImportsFromFileJSTS,
+      ts: this.extractImportsFromFileJSTS,
+    };
+
+    const getter = extToRegexp[fileExtension as SUPPORTED_LANGUAGES];
+
+    const regex = typeof getter === "function" ? getter() : getter;
+
     const matches: FileImport[] = [];
-
-    const moduleConfiguration = "ESM";
-
-    let regex;
-    if (moduleConfiguration === "ESM") {
-      regex = ESM_REGEX;
-    } else if (moduleConfiguration === "CommonJS") {
-      regex = COMMONJS_REGEX;
-    } else {
-      throw new Error("Invalid module type");
-    }
 
     let match;
 
-    while ((match = regex.exec(code)) !== null) {
+    while ((match = regex.exec(fileContent)) !== null) {
       const [_full, _as, name, multipleNames, from] = match;
 
       const imports = multipleNames
@@ -56,118 +66,96 @@ class CodeNavigatorService {
     return matches;
   }
 
-  // TODO: not working
-  private async findFunctionDeclarations(fileImports: FileImport[]) {
-    const declarations: (FileImport & { declaration: string })[] = [];
+  private async findFunctionDeclaration(func: { from: string; call: string }) {
+    const declarations = [];
 
-    for (const fileImport of fileImports) {
-      const regexpToMatchFunctionDeclarations = new RegExp(
-        `^.*${fileImport.name}.*\\(.*\\).*{[\\s\\S]*?}\\s*$`,
-        "gm"
-      );
+    const regexpToMatchFunctionDeclarations = new RegExp(
+      `^.*${func.call}.*([A-z0-9]+)?\\s*\\((?:[^)(]+|\\((?:[^)(]+|\\([^)(]*\\))*\\))*\\)\\s*\\{(?:[^}{]+|\\{(?:[^}{]+|\\{[^}{]*\\})*\\})*\\}`,
+      "gm"
+    );
 
-      const fileContent = await fileManagerService.readFileContent(
-        fileImport.from
-      );
+    const fileContent = await fileManagerService.readFileContent(func.from);
 
-      if (!fileContent) continue;
+    if (!fileContent) return null;
 
-      let match;
-      while (
-        (match = regexpToMatchFunctionDeclarations.exec(fileContent)) !== null
-      ) {
-        const [row] = match;
-        declarations.push({
-          from: fileImport.from,
-          name: fileImport.name,
-          declaration: row,
-        });
-      }
+    let match;
+    while (
+      (match = regexpToMatchFunctionDeclarations.exec(fileContent)) !== null
+    ) {
+      const [full] = match;
 
-      return declarations;
+      declarations.push({ from: func.from, declaration: full });
     }
+
+    return declarations[0]; // todo: are there multiple declarations available in Java, etc?
   }
 
-  private findFunctionCalls(functionName: string, fileContent: string) {
-    const functionCalls: string[] = [];
+  private findFunctionCallsInFile(fileContent: string, functionName: string) {
+    const calls = [];
+
+    // TODO: split to different languages
 
     const regexToMatchFunctionCalls = new RegExp(
-      `${functionName}(\\.\\w+)?\\([\\s\\S]*?\\)(?=\\s*\\/\\/|$)`,
+      `^.*${functionName}\\.?([\\.\\S]*)\\([\\S\\s]*?\\);$`,
       "gm"
     );
 
     let match;
     while ((match = regexToMatchFunctionCalls.exec(fileContent)) !== null) {
-      const [row] = match;
-      functionCalls.push(row);
+      const [_full, method] = match;
+
+      calls.push(method ? method.trim() : functionName);
     }
 
-    return functionCalls;
+    const uniqueCalls = new Set(calls);
+
+    return Array.from(uniqueCalls);
   }
 
-  private extractAbsolutePathFromFilePath(filePath: string): string | null {
-    const folders = filePath.split("/");
-
-    if (!folders.length) return null;
-
-    const fileName = folders.pop();
-
-    if (!fileName) return null;
-
-    return folders.join("/");
-  }
-
-  private mapRelativeImportsToAbsolute(
-    imports: FileImport[],
-    relativePath: string
-  ) {
-    // TODO: this is hardcoded
-    return imports.map((imp) => ({
-      name: imp.name,
-      from:
-        imp.from[0] === "."
-          ? this.extractAbsolutePathFromFilePath(relativePath) +
-            imp.from.slice(1) +
-            ".ts"
-          : imp.from,
-    }));
-  }
-
+  // TODO: improve
   private filterExternalImports(imports: FileImport[]) {
-    return imports.filter((imp) => imp.from.includes("src"));
+    return imports.filter((imp) => imp.from.includes("examples"));
   }
 
-  async findImportsForFile(filePath: string) {
-    const fileContent = await fileManagerService.readFileContent(filePath);
+  async findImportsInFile(filePath: string) {
+    const imports = await this.extractImportsFromFile(filePath);
 
+    return imports;
+  }
+
+  async findImportDeclarationsForFile(filePath: string) {
+    const fileContent = await fileManagerService.readFileContent(filePath);
     if (!fileContent) return null;
 
-    const imports = this.extractImportsFromFile(fileContent);
+    const imports = await this.findImportsInFile(filePath);
+    if (!imports) return null;
 
-    const absoluteImports = this.mapRelativeImportsToAbsolute(
-      imports,
-      filePath
+    const importWithCalls = imports.map(({ from, name }) => {
+      // TODO: take only those calls that exist in failing test
+      const calls = this.findFunctionCallsInFile(fileContent, name);
+
+      return { from, name, calls };
+    });
+
+    const functionCalls = importWithCalls.filter((f) =>
+      Boolean(f.calls.length)
     );
 
-    const filteredImports = this.filterExternalImports(absoluteImports);
+    const functionDeclarations = [];
+    for (const call of functionCalls) {
+      const declarations = await Promise.all(
+        call.calls.map(
+          (cl) =>
+            this.findFunctionDeclaration({ call: cl, from: call.from + ".ts" }) // todo: find extension
+        )
+      );
 
-    return filteredImports;
-  }
-
-  // TODO: not working yet
-  async findImportedFunctionDeclarationsForFile(filePath: string) {
-    const fileContent = await fileManagerService.readFileContent(filePath);
-
-    if (!fileContent) return null;
-
-    const imports = this.extractImportsFromFile(fileContent);
-
-    const functionCalls = imports.map(({ from, name }) => ({
-      from,
-      calls: this.findFunctionCalls(name, fileContent),
-    }));
-
-    const functionDeclarations = await this.findFunctionDeclarations(imports);
+      functionDeclarations.push({
+        name: call.name,
+        from: call.from + ".ts", // todo: tell extension
+        declarations: declarations.filter(Boolean),
+      });
+    }
 
     return functionDeclarations;
   }

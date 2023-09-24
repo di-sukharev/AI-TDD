@@ -16,16 +16,28 @@ interface FileToManipulate {
 }
 
 class FileManagerService {
+  private extractDirsFromFilePath(filePath: string): string | null {
+    const folders = filePath.split("/");
+
+    if (!folders.length) return null;
+
+    const fileName = folders.pop();
+
+    if (!fileName) return null;
+
+    return folders.join("/");
+  }
+
   async createFile(filePath: string, content?: string) {
     try {
       await Bun.write(filePath, content ?? "");
     } catch (error: any) {
-      // directory does not exist
+      // directory does not exist, create one
       if (error.code === "ENOENT") {
-        const filePathParts = filePath.split("/");
-        const _fileName = filePathParts.pop();
-        const directory = filePathParts.join("/");
-        console.log({ filePathParts, directory, _fileName });
+        const directory = this.extractDirsFromFilePath(filePath);
+
+        if (!directory) throw error;
+
         await fs.mkdir(directory);
         await this.createFile(filePath, content);
       }
