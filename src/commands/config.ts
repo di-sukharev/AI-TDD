@@ -15,7 +15,7 @@ export enum CONFIG_KEYS {
   LANGUAGE = "LANGUAGE",
 }
 
-export const DEFAULT_MODEL_TOKEN_LIMIT = 32_000;
+export const DEFAULT_MODEL_TOKEN_LIMIT = 100_000;
 
 enum CONFIG_COMMAND_MODES {
   get = "get",
@@ -177,7 +177,7 @@ export const configCommand = command(
         );
       }
     } catch (error) {
-      outroError(error);
+      outroError(error as string);
       process.exit(1);
     }
   }

@@ -13,7 +13,7 @@ enum ERRORS {
 
 // TODO: const config = getConfig();
 
-const MAX_TOKENS = 5_000;
+const MAX_TOKENS = 100_000;
 const OPENAI_API_KEY = Bun.env.OPENAI_API_KEY;
 
 if (!OPENAI_API_KEY) {
@@ -40,7 +40,7 @@ if (!OPENAI_API_KEY) {
 //   process.exit(1);
 // }
 
-const MODEL = "gpt-4";
+const MODEL = "gpt-4-1106-preview";
 
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
@@ -54,7 +54,7 @@ async function createChatCompletion(
     tools,
     temperature: 1,
     top_p: 0.1,
-    max_tokens: MAX_TOKENS,
+    // max_tokens: MAX_TOKENS,
   };
 
   try {
@@ -68,9 +68,9 @@ async function createChatCompletion(
       .map((msg) => msg.content?.length! * 3)
       .reduce((a, b) => a + b, 0);
 
-    if (REQUEST_TOKENS > DEFAULT_MODEL_TOKEN_LIMIT - MAX_TOKENS) {
-      throw new Error(ERRORS.TOO_MUCH_TOKEN);
-    }
+    // if (REQUEST_TOKENS > DEFAULT_MODEL_TOKEN_LIMIT - MAX_TOKENS) {
+    //   throw new Error(ERRORS.TOO_MUCH_TOKEN);
+    // }
 
     const completion = await openai.chat.completions.create(params);
 

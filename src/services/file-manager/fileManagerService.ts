@@ -12,7 +12,7 @@ interface IContent {
 
 interface FileToManipulate {
   filePath: string;
-  content: IContent;
+  content: IContent[];
 }
 
 class FileManipulator {
@@ -86,24 +86,26 @@ class FileManipulator {
     return newLines.join("\n");
   }
 
-  async writeFileContent(filePath: string, newContent: IContent) {
+  async writeFileContent(filePath: string, modifications: IContent[]) {
     const currentContent = await this.readFileContent(filePath);
 
-    try {
-      if (!currentContent) {
-        await this.createFile(filePath, newContent.with);
-      } else {
-        const contentToWrite = this.manipulateFileContent(
-          currentContent,
-          newContent
-        );
+    for (const modification of modifications) {
+      try {
+        if (!currentContent) {
+          await this.createFile(filePath, modification.with);
+        } else {
+          const contentToWrite = this.manipulateFileContent(
+            currentContent,
+            modification
+          );
 
-        await this.writeFile(filePath, contentToWrite);
+          await this.writeFile(filePath, contentToWrite);
 
-        return `${filePath}: success`;
+          return `${filePath}: success`;
+        }
+      } catch (error) {
+        return `${filePath}: ${error}`;
       }
-    } catch (error) {
-      return `${filePath}: ${error}`;
     }
   }
 

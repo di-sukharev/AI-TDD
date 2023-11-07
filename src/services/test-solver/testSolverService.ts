@@ -95,26 +95,33 @@ class TestSolverService {
 
           case "write_code": {
             // Perform validation for arguments specific to write_code
-            const { modifications } = args;
+            const { modifications } = args as {
+              modifications: Array<{
+                filePath: string;
+                content: {
+                  row: string;
+                  action: "replace" | "append" | "prepend";
+                  with: string;
+                }[];
+              }>;
+            };
+
             // Validate modifications...
 
-            for (const modification of modifications) {
-              // Here you would apply the changes to the code as specified.
-              // Since the OpenAI API cannot actually modify files, you would
-              // simulate this by perhaps outputting the intended changes or
-              // providing a description of what would be done.
-              // This is just a placeholder for the logic you would implement.
+            // Here you would apply the changes to the code as specified.
+            // Since the OpenAI API cannot actually modify files, you would
+            // simulate this by perhaps outputting the intended changes or
+            // providing a description of what would be done.
+            // This is just a placeholder for the logic you would implement.
 
-              const response = await fileManipulator.manage(modification.items);
+            const response = await fileManipulator.manage(modifications);
 
-              outputs.push({
-                callId: toolCall.id,
-                name: toolCall.function.name,
-                content:
-                  response.reduce((acc, result) => `${acc}\n${result}`, "") ??
-                  "",
-              });
-            }
+            outputs.push({
+              callId: toolCall.id,
+              name: toolCall.function.name,
+              content:
+                response.reduce((acc, result) => `${acc}\n${result}`, "") ?? "",
+            });
 
             break;
           }
