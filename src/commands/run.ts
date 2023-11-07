@@ -1,14 +1,18 @@
 import { intro, isCancel, note, select } from "@clack/prompts";
 import { command } from "cleye";
-import { fileManagerService } from "../services/file-manager/fileManagerService";
-import { testFinderService } from "../services/test-finder/testFinderService";
-import { testRunnerService } from "../services/test-runner/testRunnerService";
-import { testSolver } from "../services/test-solver/testSolverService";
+import { fileManipulator } from "../services/file-manager/fileManagerService";
+import { testFinder } from "../services/test-finder/testFinderService";
+import { testRunner } from "../services/test-runner/testRunnerService";
+import {
+  ToolCallOutput,
+  testSolver,
+} from "../services/test-solver/testSolverService";
 import { call } from "../utils/call";
 import { outroError, outroSuccess } from "../utils/prompts";
 import { COMMANDS } from "./enums";
 import { codeNavigatorService } from "../services/code-navigator/codeNavigatorService";
 import chalk from "chalk";
+import OpenAI from "openai";
 
 export const runCommand = command(
   {
@@ -21,62 +25,54 @@ export const runCommand = command(
     // TODO: check latest version
     // TODO: check is initialized
 
-    const [testFilePath, testFilePathError] = await call(
-      testFinderService.find()
-    );
+    const [testFilePath, testFilePathError] = await call(testFinder.find());
 
     if (testFilePathError) {
       outroError("Test file not found");
-      process.exit(1);
+      return process.exit(1);
     }
 
     const MAX_ATTEMPTS = 10; // TODO: make tries configurable
 
     let attempts = MAX_ATTEMPTS;
 
+    const context: Array<OpenAI.Chat.ChatCompletionMessageParam> = [];
+
     let isTestPassing = false;
     while (!isTestPassing && attempts > 0) {
-      const result = await testRunnerService.assert(testFilePath);
+      const result = await testRunner.assert(testFilePath);
 
       if (result.failed) {
-        const clarifications =
-          "TODO: any apis to call, any file that can be used as an example?";
-
-        const testRelevantFiles =
-          await codeNavigatorService.findImportDeclarationsForFile(
-            testFilePath
-          );
-
-        const testRelevantFilesWithDeclarations = testRelevantFiles?.filter(
-          (file) =>
-            Boolean(file.declarations) &&
-            file.declarations?.length &&
-            file.declarations
-        );
-
-        // return process.exit(1);
-
-        const filesToWrite = await testSolver.solve({
+        const { callOutputs, message } = await testSolver.solve({
           testFilePath,
-          testRelevantFiles: testRelevantFilesWithDeclarations as any,
           error: result.message,
-          clarifications,
+          context,
         });
 
-        await note(`COMMAND:\n${JSON.stringify(filesToWrite)}`);
+        if (message.content)
+          note(message.content); // todo: stream tokens to stdout
+        else note("No content in message");
+
+        context.push(message);
+
+        callOutputs?.forEach((out: ToolCallOutput) =>
+          context.push({
+            role: "tool",
+            tool_call_id: out.callId,
+            content: out.content,
+          })
+        );
 
         const confirmExecution = await select({
           message: chalk.cyan(`Execute command?`),
           options: [
-            { value: true, label: "YES 🪩" },
-            { value: false, label: "NO 🚫" },
+            { value: true, label: "✅" },
+            { value: false, label: "🚫" },
           ],
         });
 
         if (isCancel(confirmExecution) || !confirmExecution)
           return process.exit(1);
-
-        await fileManagerService.manage(filesToWrite);
 
         attempts--;
       } else {

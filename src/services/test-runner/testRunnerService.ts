@@ -49,4 +49,4 @@ class TestRunnerService {
   }
 }
 
-export const testRunnerService = new TestRunnerService();
+export const testRunner = new TestRunnerService();

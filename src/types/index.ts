@@ -13,3 +13,7 @@ export interface FileWithCode {
   path: string;
   code: string;
 }
+
+export interface FunctionsToCall {
+  todo: any;
+}

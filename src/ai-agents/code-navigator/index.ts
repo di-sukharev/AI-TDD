@@ -10,6 +10,7 @@
 import OpenAI from "openai";
 
 import { OpenAiApi } from "../../apis/open-ai";
+import { spinner } from "@clack/prompts";
 
 interface CodeImport {
   row: string;
@@ -23,7 +24,7 @@ interface CodeImport {
 class CodeNavigator {
   private getChatCompletionPrompt(
     imports: CodeImport[]
-  ): Array<OpenAI.Chat.ChatCompletionMessage> {
+  ): Array<OpenAI.Chat.ChatCompletionMessageParam> {
     return [
       {
         role: "system",

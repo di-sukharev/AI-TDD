@@ -1,5 +1,3 @@
-import { outro } from "@clack/prompts";
-
 export async function exe(args: string[]) {
   const proc = Bun.spawnSync(args);
 

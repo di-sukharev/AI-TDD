@@ -15,7 +15,7 @@ interface FileToManipulate {
   content: IContent;
 }
 
-class FileManagerService {
+class FileManipulator {
   private extractDirsFromFilePath(filePath: string): string | null {
     const folders = filePath.split("/");
 
@@ -89,23 +89,29 @@ class FileManagerService {
   async writeFileContent(filePath: string, newContent: IContent) {
     const currentContent = await this.readFileContent(filePath);
 
-    if (!currentContent) {
-      await this.createFile(filePath, newContent.with);
-    } else {
-      const contentToWrite = this.manipulateFileContent(
-        currentContent,
-        newContent
-      );
+    try {
+      if (!currentContent) {
+        await this.createFile(filePath, newContent.with);
+      } else {
+        const contentToWrite = this.manipulateFileContent(
+          currentContent,
+          newContent
+        );
 
-      await this.writeFile(filePath, contentToWrite);
+        await this.writeFile(filePath, contentToWrite);
+
+        return `${filePath}: success`;
+      }
+    } catch (error) {
+      return `${filePath}: ${error}`;
     }
   }
 
-  async manage(files: FileToManipulate[]): Promise<void> {
-    await Promise.all(
+  async manage(files: FileToManipulate[]) {
+    return await Promise.all(
       files.map((file) => this.writeFileContent(file.filePath, file.content))
     );
   }
 }
 
-export const fileManagerService = new FileManagerService();
+export const fileManipulator = new FileManipulator();

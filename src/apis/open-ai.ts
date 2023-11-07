@@ -3,7 +3,7 @@ import OpenAI from "openai";
 
 import { outro } from "@clack/prompts";
 
-import { DEFAULT_MODEL_TOKEN_LIMIT, getConfig } from "../commands/config";
+import { DEFAULT_MODEL_TOKEN_LIMIT } from "../commands/config";
 import { outroError } from "../utils/prompts";
 // import { tokenCount } from "../utils/token-count";
 
@@ -45,11 +45,13 @@ const MODEL = "gpt-4";
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
 async function createChatCompletion(
-  messages: Array<OpenAI.Chat.ChatCompletionMessage>
-): Promise<string | null> {
+  messages: Array<OpenAI.Chat.ChatCompletionMessageParam>,
+  tools: Array<OpenAI.ChatCompletionTool>
+): Promise<OpenAI.Chat.Completions.ChatCompletionMessage> {
   const params = {
     model: MODEL,
     messages,
+    tools,
     temperature: 1,
     top_p: 0.1,
     max_tokens: MAX_TOKENS,
@@ -74,7 +76,7 @@ async function createChatCompletion(
 
     const message = completion.choices[0].message;
 
-    return message?.content;
+    return message;
   } catch (error) {
     // TODO: remove
     outroError(JSON.stringify(params));

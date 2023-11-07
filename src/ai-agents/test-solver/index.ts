@@ -1,31 +1,31 @@
 import OpenAI from "openai";
 
-import { OpenAiApi } from "../../apis/open-ai";
 import { spinner } from "@clack/prompts";
-import { CodeToWrite, FileWithCode } from "../../types";
+import { OpenAiApi } from "../../apis/open-ai";
+import { FileWithCode } from "../../types";
+import { FUNCTIONS } from "./functions";
+
+interface Props {
+  testFile: FileWithCode;
+  relevantFiles?: FileWithCode[];
+  error: string;
+  context?: Array<OpenAI.Chat.ChatCompletionMessageParam>;
+}
 
 class TestSolverAgent {
   private getChatCompletionPrompt(
     test: FileWithCode,
     error: string,
     files: FileWithCode[] = []
-  ): Array<OpenAI.Chat.ChatCompletionMessage> {
+  ): Array<OpenAI.Chat.ChatCompletionMessageParam> {
     return [
       {
         role: "system",
         content: [
-          "You are an AI agent that solves tests in REPL mode using Test-Driven Development (TDD) practices. I send you a test suite code with related modules—you recognize the tech stack and generate code to pass all the tests.",
+          "You are autoregressive language model that has been fine-tuned with instruction-tuning and RLHF, each token you produce is another opportunity to use computation, therefore you always spend a few sentences explaining background context, assumptions, and step-by-step thinking BEFORE you try to respond.",
+          "You are to act as an AI agent that solves tests in REPL mode as per the Test-Driven Development (TDD) practices.",
+          "I send you a test suite code, then you recognize the tech stack and generate production ready code to pass all the tests.",
           "Adhere strictly to Test-Driven Development (TDD) practices, ensuring that all code written is robust, efficient, and passes the tests.",
-          "DO NOT provide any explanations, strictly response in the JSON format:",
-          "```",
-          `{ filePath: string; content: { row: string; action: "replace" | "append" | "prepend"; with: string; }; }[]`,
-          "```",
-          "Where:",
-          "'row' is not a line number but the actual line of code,",
-          "'append' action appends to the 'row', 'replace' replaces the non-empty-string row, and 'prepend' the 'with' code prepends before the row.",
-          "and 'filePath' is an absolute file path relative to the test file path, so if test path is 'src/__tests__/file.test.ts' then import should be relative to that path, e.g. 'src/__tests__/<your_file>'.",
-          "",
-          "You must not leave TODO code, generate production ready code.",
         ].join("\n"),
       },
       {
@@ -36,7 +36,7 @@ class TestSolverAgent {
           test.code,
           "```",
           "",
-          `This is a stdout error for the '${test.path}' run:`,
+          `This is a stderr for the '${test.path}' run:`,
           "```",
           error,
           "```",
@@ -55,66 +55,61 @@ class TestSolverAgent {
     ];
   }
 
-  async callOpenAi(
-    testFile: FileWithCode,
-    relevantFiles: FileWithCode[],
-    error: string
-  ) {
+  async callOpenAi({ testFile, relevantFiles, error, context = [] }: Props) {
     const prompt = this.getChatCompletionPrompt(testFile, error, relevantFiles);
 
-    console.log({ prompt });
+    const message = await OpenAiApi.createChatCompletion(
+      [...prompt, ...context],
+      [
+        {
+          type: "function",
+          function: FUNCTIONS.AWK,
+        },
+        {
+          type: "function",
+          function: FUNCTIONS.GREP,
+        },
+        {
+          type: "function",
+          function: FUNCTIONS.FIND,
+        },
+        {
+          type: "function",
+          function: FUNCTIONS.WRITE_CODE,
+        },
+      ]
+    );
 
-    const res = await OpenAiApi.createChatCompletion(prompt);
-
-    return res;
-  }
-
-  private async getCodeToAdjustForFailingTest({
-    testFile,
-    relevantFiles,
-    error,
-  }: {
-    testFile: FileWithCode;
-    relevantFiles: FileWithCode[];
-    error: string;
-  }): Promise<CodeToWrite[]> {
-    const loader = spinner();
-
-    try {
-      loader.start("LLM is solving the test");
-      const res = await this.callOpenAi(testFile, relevantFiles, error);
-      loader.stop("LLM got an idea, applying…");
-
-      if (!res) {
-        loader.stop("Something went wrong");
-        return process.exit(1);
-      }
-
-      const codeToAdjust = JSON.parse(res);
-
-      // todo: validate the codeToAdjust structure with joi
-
-      return codeToAdjust;
-    } catch (error) {
-      loader.stop("Something went wrong");
-      return process.exit(1);
-    }
+    return message;
   }
 
   async solve({
     testFile,
-    relevantFiles,
+    relevantFiles = [],
     error,
-  }: {
-    testFile: FileWithCode;
-    relevantFiles?: FileWithCode[];
-    error: string;
-  }) {
-    return await this.getCodeToAdjustForFailingTest({
-      testFile,
-      relevantFiles: relevantFiles || [],
-      error,
-    });
+    context = [],
+  }: Props): Promise<OpenAI.Chat.Completions.ChatCompletionMessage> {
+    const loader = spinner();
+
+    try {
+      loader.start("GPT is solving the test");
+      const message = await this.callOpenAi({
+        testFile,
+        relevantFiles,
+        error,
+        context,
+      });
+      // TODO: map over tool_calls and describe what it wants to do
+
+      loader.stop("GPT has an idea, applying 🔧🪛🔨");
+
+      // todo: validate the codeToAdjust structure with joi
+
+      return message;
+    } catch (error) {
+      loader.stop("Something went wrong");
+      return process.exit(1);
+    }
   }
 }
 

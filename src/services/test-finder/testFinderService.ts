@@ -105,4 +105,4 @@ class TestFinderService {
   }
 }
 
-export const testFinderService = new TestFinderService();
+export const testFinder = new TestFinderService();

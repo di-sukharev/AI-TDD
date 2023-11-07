@@ -4,7 +4,7 @@
 
 import path from "path/posix";
 import { exe } from "../../utils/shell";
-import { fileManagerService } from "../file-manager/fileManagerService";
+import { fileManipulator } from "../file-manager/fileManagerService";
 
 interface FileImport {
   name: string;
@@ -31,7 +31,7 @@ class CodeNavigatorService {
   }
 
   private async extractImportsFromFile(filePath: string) {
-    const fileContent = await fileManagerService.readFileContent(filePath);
+    const fileContent = await fileManipulator.readFileContent(filePath);
     if (!fileContent) return null;
 
     const fileExtension = path.extname(filePath).replace(".", "");
@@ -74,7 +74,7 @@ class CodeNavigatorService {
       "gm"
     );
 
-    const fileContent = await fileManagerService.readFileContent(func.from);
+    const fileContent = await fileManipulator.readFileContent(func.from);
 
     if (!fileContent) return null;
 
@@ -124,7 +124,7 @@ class CodeNavigatorService {
   }
 
   async findImportDeclarationsForFile(filePath: string) {
-    const fileContent = await fileManagerService.readFileContent(filePath);
+    const fileContent = await fileManipulator.readFileContent(filePath);
     if (!fileContent) return null;
 
     const imports = await this.findImportsInFile(filePath);
