@@ -4,8 +4,9 @@ const random = mock((multiplier: number) => multiplier * Math.random());
 
 test("random", async () => {
   const a = random(2);
-random(2); // Second call
-  random(2); // Third call
+
+  const b = random(2); // Second call
+  const c = random(2); // Third call
 
   expect(random).toHaveBeenCalled();
   expect(random).toHaveBeenCalledTimes(3);

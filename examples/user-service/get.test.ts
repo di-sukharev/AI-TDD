@@ -1,7 +1,6 @@
 import { afterAll, beforeAll, expect, test } from "bun:test";
 import UserService from "examples/user-service/userService";
 import { unlink } from "fs/promises";
-import * as fs from "fs";
 
 const users = [{ id: 1, name: "John Doe", email: "john.doe@example.com" }];
 
