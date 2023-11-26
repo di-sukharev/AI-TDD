@@ -1,31 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Reset
-Color_Off=''
-
-# Regular Colors
-Red=''
-Green=''
-Dim='' # White
-
-# Bold
-Bold_White=''
-Bold_Green=''
-
-if [[ -t 1 ]]; then
-    # Reset
-    Color_Off='\033[0m' # Text Reset
-
-    # Regular Colors
-    Red='\033[0;31m'   # Red
-    Green='\033[0;32m' # Green
-    Dim='\033[0;2m'    # White
-
-    # Bold
-    Bold_Green='\033[1;32m' # Bold Green
-    Bold_White='\033[1m'    # Bold White
-fi
+# Color codes and helper functions
+Color_Off='\033[0m' # Text Reset
+Red='\033[0;31m'   # Red
+Green='\033[0;32m' # Green
+Dim='\033[0;2m'    # White (Dimmed)
+Bold_White='\033[1m'    # Bold White
+Bold_Green='\033[1;32m' # Bold Green
 
 error() {
     echo -e "${Red}error${Color_Off}:" "$@" >&2
@@ -44,44 +26,24 @@ success() {
     echo -e "${Green}$@ ${Color_Off}"
 }
 
-tildify() {
-    if [[ $1 = $HOME/* ]]; then
-        local replacement=\~/
-
-        echo "${1/$HOME\//$replacement}"
-    else
-        echo "$1"
-    fi
-}
-
-# [Initialize color codes and helper functions as in bun.sh]
-
 # Check for bun
-command -v bun >/dev/null ||
-    error 'bun is required to run aitdd. Please install bun first.'
+command -v bun >/dev/null || error 'bun is required to run aitdd. Please install bun first.'
 
-# Define the GitHub repository URL
+# Define the GitHub repository URL and download URL for your CLI
 github_repo="https://github.com/di-sukharev/AI-TDD"
-
-# Construct the download URL for your CLI
-# Modify this URL to point to the specific release or directory containing cli.ts
 aitdd_uri="$github_repo/releases/latest/download/out.zip"
 
-# Define the installation directory
+# Define the installation directory and executable
 install_dir=${HOME}/.aitdd
 bin_dir=$install_dir/bin
 exe=$bin_dir/aitdd
 
 # Create the installation directory if it doesn't exist
-mkdir -p "$bin_dir" ||
-    error "Failed to create install directory \"$bin_dir\""
+mkdir -p "$bin_dir" || error "Failed to create install directory \"$bin_dir\""
 
 # Download and extract your CLI files
-curl --fail --location --output "$exe.zip" "$aitdd_uri" ||
-    error "Failed to download aitdd from \"$aitdd_uri\""
-
-unzip -oqd "$install_dir" "$exe.zip" ||
-    error 'Failed to extract aitdd'
+curl --fail --location --output "$exe.zip" "$aitdd_uri" || error "Failed to download aitdd from \"$aitdd_uri\""
+unzip -oqd "$install_dir" "$exe.zip" || error 'Failed to extract aitdd'
 
 # Create the aitdd wrapper command
 cat <<EOF >"$exe"
@@ -91,47 +53,32 @@ bun $install_dir/cli.js "\$@"
 EOF
 
 # Make the wrapper executable
-chmod +x "$exe" ||
-    error 'Failed to set permissions on aitdd executable'
+chmod +x "$exe" || error 'Failed to set permissions on aitdd executable'
 
 # Update shell configuration to include aitdd in PATH
-install_env=AI_TDD_INSTALL
-bin_env="$install_dir/bin"
-
-# Detecting the shell
-current_shell=$(ps -p $$ -ocomm=)
-
 update_path() {
     local config_file=$1
-    local config_file_tilde=${config_file/#$HOME/\~}
-
-    if [[ -w $config_file ]]; then
-        echo "export $install_env=\"$install_dir\"" >> "$config_file"
-        echo "export PATH=\"$bin_env:\$PATH\"" >> "$config_file"
-        echo "Updated $config_file_tilde with AiTDD PATH"
-    else
-        echo "Please add the following lines to your $config_file_tilde:"
-        echo "  export $install_env=\"$install_dir\""
-        echo "  export PATH=\"$bin_env:\$PATH\""
-    fi
+    echo -e "\n# ai-tdd\nexport AI_TDD_INSTALL=\"$install_dir\"\nexport PATH=\"\$AI_TDD_INSTALL/bin:\$PATH\"" >> "$config_file"
+    success "Updated $config_file with ai-tdd PATH"
 }
 
-case "$current_shell" in
-*fish)
+# Detect the user's shell and update the corresponding configuration file
+case "${SHELL##*/}" in
+fish)
     update_path "$HOME/.config/fish/config.fish"
     ;;
-*zsh)
+zsh)
     update_path "$HOME/.zshrc"
     ;;
-*bash)
+bash)
     update_path "$HOME/.bashrc"
     update_path "$HOME/.bash_profile"
     ;;
 *)
-    echo "Your shell ($current_shell) is not explicitly supported for automatic PATH update."
-    echo "Please add $bin_env to your PATH manually."
+    echo "Your shell (${SHELL##*/}) is not explicitly supported for automatic PATH update."
+    echo "Please add $bin_dir to your PATH manually."
     ;;
 esac
 
-# Success message
+# Final success message
 success "aitdd was installed successfully. Please restart your terminal or source your shell config for the changes to take effect."
