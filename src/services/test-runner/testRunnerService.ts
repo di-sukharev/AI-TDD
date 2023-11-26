@@ -35,25 +35,17 @@ class TestRunnerService {
   async assert(testFilePath: string) {
     const runCommand = this.getRunCommand();
 
-    try {
-      const { stdout, stderr, exitCode } = await exe([
-        ...runCommand,
-        testFilePath,
-      ]);
+    const { stdout, stderr, exitCode } = await exe([
+      ...runCommand,
+      testFilePath,
+    ]);
 
-      if (stderr) note(stderr);
+    if (stderr) note(stderr);
 
-      return {
-        message: this.getMessage(stdout || stderr),
-        failed: exitCode !== 0,
-      };
-    } catch (error) {
-      console.log("REMOVE THIS BLOCK IF IT'S NOT BEING CALLED");
-      return {
-        message: error as string,
-        failed: true,
-      };
-    }
+    return {
+      message: this.getMessage(stdout || stderr),
+      failed: exitCode !== 0,
+    };
   }
 }
 

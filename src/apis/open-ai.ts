@@ -15,9 +15,7 @@ if (!OPENAI_API_KEY) {
   outro(
     "OPENAI_API_KEY is not set, please run `aitdd config set OPENAI_API_KEY=<your token>. Make sure you add payment details, so API works.`"
   );
-  outro(
-    "For help look into README https://github.com/di-sukharev/ai-tdd#setup"
-  );
+  outro("For help look into README https://github.com/di-sukharev/aitdd#setup");
 
   process.exit(1);
 }
@@ -59,7 +57,7 @@ async function createChatCompletion(
 
       if (openAiError?.message) outro(openAiError.message);
       outro(
-        "For help look into README https://github.com/di-sukharev/ai-tdd#setup"
+        "For help look into README https://github.com/di-sukharev/aitdd#setup"
       );
     }
 

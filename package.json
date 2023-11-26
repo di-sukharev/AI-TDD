@@ -1,7 +1,7 @@
 {
-  "version": "2.0.9",
-  "name": "ai-tdd",
-  "description": "You write a test -> AI-TDD writes the code to pass it ✅",
+  "version": "0.0.0",
+  "name": "aitdd",
+  "description": "You write a test -> GPT writes the code to pass it ✅",
   "bin": {
     "aitdd": "bun index.ts"
   },

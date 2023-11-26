@@ -27,7 +27,7 @@ export const getIsGitRepo = async () => {
 //   const ig = ignore();
 
 //   try {
-//     ig.add(readFileSync(".ai-tddignore").toString().split("\n"));
+//     ig.add(readFileSync(".aitddignore").toString().split("\n"));
 //   } catch (e) {}
 
 //   return ig;

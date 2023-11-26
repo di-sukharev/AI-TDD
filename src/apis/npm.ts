@@ -3,10 +3,10 @@ import { exe } from "src/utils/shell";
 
 const getLatestVersion = async (): Promise<string | undefined> => {
   try {
-    const { stdout } = await exe(["npm", "view", "ai-tdd", "version"]);
+    const { stdout } = await exe(["npm", "view", "aitdd", "version"]);
     return stdout;
   } catch (_) {
-    outro("Error while getting the latest version of ai-tdd");
+    outro("Error while getting the latest version of aitdd");
     return undefined;
   }
 };

@@ -17,7 +17,7 @@ export const checkIsLatestVersion = async () => {
           `
 You are not using the latest stable version of AITDD with new features and bug fixes.
 Current version: ${currentVersion}. Latest version: ${latestVersion}.
-🚀 To update run: npm i -g ai-tdd@latest.
+🚀 To update run: npm i -g aitdd@latest.
         `
         )
       );

@@ -11,7 +11,7 @@ const extraArgs = process.argv.slice(2);
 cli(
   {
     version: packageJSON.version,
-    name: "ai-tdd",
+    name: "aitdd",
     commands: [initCommand, runCommand, configCommand],
     flags: {},
     ignoreArgv: (type) => type === "unknown-flag" || type === "argument",

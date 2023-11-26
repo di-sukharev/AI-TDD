@@ -8,7 +8,7 @@ export const initCommand = command(
     // parameters: ["<mode>", "<key=values...>"],
   },
   async (argv) => {
-    intro("AI-TDD is initializing 🐣");
+    intro("aitdd is initializing 🐣");
 
     // TODO
 

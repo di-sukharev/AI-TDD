@@ -58,7 +58,6 @@ export const configValidators = {
   },
 
   [CONFIG_KEYS.RUN_TESTS](value: any) {
-    console.log({ value });
     validateConfig(
       CONFIG_KEYS.RUN_TESTS,
       typeof value === "string",
@@ -134,7 +133,7 @@ export const getConfig = (): ConfigType | null => {
       outro(
         `'${configKey}' name is invalid, it should be either '${configKey.toUpperCase()}' or it doesn't exist.`
       );
-      outro(`Manually fix the '.env' file or global '~/.ai-tdd' config file.`);
+      outro(`Manually fix the '.env' file or global '~/.aitdd' config file.`);
       process.exit(1);
     }
   }
@@ -171,11 +170,10 @@ export const configCommand = command(
     parameters: ["<mode>", "<key>", "<values...>"],
   },
   async (argv) => {
-    intro("ai-tdd — config");
+    intro("aitdd — config");
     try {
       const { mode, key, values } = argv._;
 
-      console.log({ mode, key, values });
       if (mode === CONFIG_COMMAND_MODES.get) {
         const config = getConfig() || {};
         for (const key of values) {

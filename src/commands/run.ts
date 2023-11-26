@@ -17,7 +17,7 @@ export const runCommand = command(
     // parameters: ["<mode>", "<key=values...>"],
   },
   async (argv) => {
-    intro("AI-TDD is spinning 🪩");
+    intro("aitdd is spinning 🪩");
 
     // TODO: check latest version
     // TODO: check is initialized
