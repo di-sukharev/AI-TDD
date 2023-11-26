@@ -88,11 +88,10 @@ unzip -oqd "$bin_dir" "$exe.zip" ||
 mv "$bin_dir/aitdd-$target/$exe_name.js" "$exe.js" ||
     error 'Failed to move extracted aitdd to destination'
 
-# Create the aitdd wrapper command
 cat <<EOF >"$exe"
 #!/usr/bin/env bash
 set -euo pipefail
-bun $install_dir/aitdd.js "\$@"
+bun $bin_dir/aitdd.js "\$@"
 EOF
 
 # Make the wrapper executable
