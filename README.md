@@ -8,7 +8,7 @@
 	<h2>GPT powered CLI for TDD</h2>
 	<h2>You write the test — GPT writes the code until it passes the test ✅</h2>
 	<p>Prompting GPT with a test suite makes it write code impressively accurate</p>
-	<a href="https://www.npmjs.com/package/aitdd"><img src="https://img.shields.io/npm/v/aitdd" alt="Current version"></a>
+	<a href="https://www.npmjs.com/package/aitdd"><img src="https://img.shields.io/npm/v/ai-tdd" alt="Current version"></a>
 </div>
 
 ---
