@@ -30,7 +30,7 @@ AITDD runs on [Bun](https://bun.sh/), installing AITDD will install latest Bun.
    aitdd config set OPENAI_API_KEY <your_api_key>
    ```
 
-   Your api key is stored locally in `~/.aitdd` config file and is not stored anywhere in any other way.
+   Your api key is stored locally in `~/.aitdd/config` config file and is not stored anywhere in any other way.
 
 4. Set the command to run the tests:
 
@@ -38,7 +38,7 @@ AITDD runs on [Bun](https://bun.sh/), installing AITDD will install latest Bun.
    aitdd config set RUN_TESTS "npm run test"
    ```
 
-Your api key is stored locally in `~/.aitdd` config file and is not stored anywhere in any other way.
+Your api key is stored locally in `~/.aitdd/config` config file and is not stored anywhere in any other way.
 
 ## Example
 

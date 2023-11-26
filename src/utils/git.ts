@@ -19,52 +19,6 @@ export const getIsGitRepo = async () => {
   }
 };
 
-// const excludeBigFilesFromDiff = ['*-lock.*', '*.lock'].map(
-//   (file) => `:(exclude)${file}`
-// );
-
-// export const getAITDDIgnore = (): Ignore => {
-//   const ig = ignore();
-
-//   try {
-//     ig.add(readFileSync(".aitddignore").toString().split("\n"));
-//   } catch (e) {}
-
-//   return ig;
-// };
-
-// export const getCoreHooksPath = async (): Promise<string> => {
-//   const { stdout } = await execa("git", ["config", "core.hooksPath"]);
-
-//   return stdout;
-// };
-
-// export const getStagedFiles = async (): Promise<string[]> => {
-//   const { stdout: gitDir } = await execa("git", [
-//     "rev-parse",
-//     "--show-toplevel",
-//   ]);
-
-//   const { stdout: files } = await execa("git", [
-//     "diff",
-//     "--name-only",
-//     "--cached",
-//     "--relative",
-//     gitDir,
-//   ]);
-
-//   if (!files) return [];
-
-//   const filesList = files.split("\n");
-
-//   const ig = getAITDDIgnore();
-//   const allowedFiles = filesList.filter((file) => !ig.ignores(file));
-
-//   if (!allowedFiles) return [];
-
-//   return allowedFiles.sort();
-// };
-
 export const getChangedFiles = async (): Promise<string[]> => {
   await assertGitRepo();
 
@@ -82,13 +36,6 @@ export const getChangedFiles = async (): Promise<string[]> => {
 
   return files.sort();
 };
-
-// export const gitAdd = async ({ files }: { files: string[] }) => {
-//   const gitAddSpinner = spinner();
-//   gitAddSpinner.start('Adding files to commit');
-//   await execa('git', ['add', ...files]);
-//   gitAddSpinner.stop('Done');
-// };
 
 export const getDiff = async ({ files }: { files: string[] }) => {
   const lockFiles = files.filter(

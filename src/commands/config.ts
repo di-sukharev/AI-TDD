@@ -88,7 +88,7 @@ export type ConfigType = {
   [key in CONFIG_KEYS]?: any;
 };
 
-const configPath = pathJoin(homedir(), ".aitdd");
+const configPath = pathJoin(homedir(), ".aitdd", "config");
 
 export const getConfig = (): ConfigType | null => {
   const defaults = {
@@ -133,7 +133,9 @@ export const getConfig = (): ConfigType | null => {
       outro(
         `'${configKey}' name is invalid, it should be either '${configKey.toUpperCase()}' or it doesn't exist.`
       );
-      outro(`Manually fix the '.env' file or global '~/.aitdd' config file.`);
+      outro(
+        `Manually fix the '.env' file or global '~/.aitdd/config' config file.`
+      );
       process.exit(1);
     }
   }
