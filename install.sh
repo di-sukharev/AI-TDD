@@ -49,6 +49,10 @@ success() {
     echo -e "${Green}$@ ${Color_Off}"
 }
 
+# Ensure bun is installed
+command -v bun >/dev/null ||
+    error 'bun is required to run aitdd. Please install bun first.'
+
 GITHUB=${GITHUB-"https://github.com"}
 
 github_repo="$GITHUB/di-sukharev/ai-tdd"
@@ -81,15 +85,17 @@ curl --fail --location --progress-bar --output "$exe.zip" "$aitdd_uri" ||
 unzip -oqd "$bin_dir" "$exe.zip" ||
     error 'Failed to extract aitdd'
 
-mv "$bin_dir/aitdd-$target/$exe_name" "$exe" ||
+mv "$bin_dir/aitdd-$target/$exe_name.js" "$exe.js" ||
     error 'Failed to move extracted aitdd to destination'
 
+# Create the aitdd wrapper command
 cat <<EOF >"$exe"
 #!/usr/bin/env bash
 set -euo pipefail
-bun $install_dir/out/cli.js "\$@"
+bun $install_dir/aitdd.js "\$@"
 EOF
 
+# Make the wrapper executable
 chmod +x "$exe" ||
     error 'Failed to set permissions on aitdd executable'
 
