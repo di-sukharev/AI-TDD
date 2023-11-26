@@ -84,7 +84,51 @@ EOF
 chmod +x "$exe" ||
     error 'Failed to set permissions on aitdd executable'
 
-export PATH="$bin_dir:$PATH"
+# New section: Update shell configuration to include aitdd in PATH
+install_env=AiTDD_INSTALL
+bin_env=\$$install_env/bin
+
+tilde_bin_dir=$(tildify "$bin_dir")
+quoted_install_dir=\"${install_dir//\"/\\\"}\"
+
+case $(basename "$SHELL") in
+fish)
+    fish_config=$HOME/.config/fish/config.fish
+    if [[ -w $fish_config ]]; then
+        echo -e '\n# AiTDD\nset --export $install_env $quoted_install_dir\nset --export PATH $bin_env \$PATH' >> "$fish_config"
+        echo "Added \"$tilde_bin_dir\" to \$PATH in fish config"
+    else
+        echo "Manually add the following lines to your fish config ($fish_config):"
+        echo "  set --export $install_env $quoted_install_dir"
+        echo "  set --export PATH $bin_env \$PATH"
+    fi
+    ;;
+zsh)
+    zsh_config=$HOME/.zshrc
+    if [[ -w $zsh_config ]]; then
+        echo -e '\n# AiTDD\nexport $install_env=$quoted_install_dir\nexport PATH=\"$bin_env:\$PATH\"' >> "$zsh_config"
+        echo "Added \"$tilde_bin_dir\" to \$PATH in zsh config"
+    else
+        echo "Manually add the following lines to your zsh config ($zsh_config):"
+        echo "  export $install_env=$quoted_install_dir"
+        echo "  export PATH=\"$bin_env:\$PATH\""
+    fi
+    ;;
+bash)
+    bash_config=$HOME/.bashrc
+    if [[ -w $bash_config ]]; then
+        echo -e '\n# AiTDD\nexport $install_env=$quoted_install_dir\nexport PATH=$bin_env:\$PATH' >> "$bash_config"
+        echo "Added \"$tilde_bin_dir\" to \$PATH in bash config"
+    else
+        echo "Manually add the following lines to your bash config ($bash_config):"
+        echo "  export $install_env=$quoted_install_dir"
+        echo "  export PATH=$bin_env:\$PATH"
+    fi
+    ;;
+*)
+    echo "Your shell is not explicitly supported for automatic PATH update. Please add $bin_dir to your PATH manually."
+    ;;
+esac
 
 # Success message
-success "aitdd was installed successfully"
+success "aitdd was installed successfully. Please restart your terminal or source your shell config for the changes to take effect."
