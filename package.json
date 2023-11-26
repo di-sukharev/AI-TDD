@@ -19,7 +19,8 @@
   "scripts": {
     "start": "bun run cli.ts",
     "test": "bun test",
-    "posttest": "bun run __tests__/sandbox/clean.ts"
+    "posttest": "bun run __tests__/sandbox/clean.ts",
+    "build": "bun build ./cli.ts --target=bun --outdir=out"
   },
   "devDependencies": {
     "@types/ini": "^1.3.31",

@@ -34,7 +34,7 @@ unzip -oqd "$install_dir" "$exe.zip" ||
 cat <<EOF >"$exe"
 #!/usr/bin/env bash
 set -euo pipefail
-bun $install_dir/src/cli.ts "\$@"
+bun $install_dir/cli.js "\$@"
 EOF
 
 # Make the wrapper executable
