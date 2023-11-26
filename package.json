@@ -1,16 +1,13 @@
 {
-  "version": "2.1.7",
+  "version": "0.0.1",
   "name": "ai-tdd",
   "description": "You write a test -> GPT writes the code to pass it ✅",
   "bin": {
-    "aitdd": ".cli.ts"
+    "aitdd": "./cli.ts"
   },
   "author": "https://github.com/di-sukharev",
   "module": "cli.ts",
   "type": "module",
-  "files": [
-    "./out/cli.js"
-  ],
   "release": {
     "branches": [
       "master"
