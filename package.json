@@ -12,7 +12,7 @@
     "start": "bun run index.ts",
     "test": "bun test",
     "posttest": "bun run __tests__/sandbox/clean.ts",
-    "publish": "npm version patch && npm publish --tag latest"
+    "deploy": "npm version patch && npm publish --tag latest"
   },
   "devDependencies": {
     "@types/ini": "^1.3.31",
