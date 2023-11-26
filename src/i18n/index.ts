@@ -1,22 +1,4 @@
-import cs from "../i18n/cs.json";
-import de from "../i18n/de.json";
 import en from "../i18n/en.json";
-import es_ES from "../i18n/es_ES.json";
-import fr from "../i18n/fr.json";
-import id_ID from "../i18n/id_ID.json";
-import it from "../i18n/it.json";
-import ja from "../i18n/ja.json";
-import ko from "../i18n/ko.json";
-import nl from "../i18n/nl.json";
-import pl from "../i18n/pl.json";
-import pt_br from "../i18n/pt_br.json";
-import ru from "../i18n/ru.json";
-import sv from "../i18n/sv.json";
-import th from "../i18n/th.json";
-import tr from "../i18n/tr.json";
-import vi_VN from "../i18n/vi_VN.json";
-import zh_CN from "../i18n/zh_CN.json";
-import zh_TW from "../i18n/zh_TW.json";
 
 export enum I18nLocals {
   "en" = "en",
@@ -41,24 +23,6 @@ export enum I18nLocals {
 
 export const i18n = {
   en,
-  zh_CN,
-  zh_TW,
-  ja,
-  cs,
-  de,
-  fr,
-  it,
-  ko,
-  pt_br,
-  vi_VN,
-  es_ES,
-  sv,
-  id_ID,
-  nl,
-  ru,
-  pl,
-  tr,
-  th,
 };
 
 export const I18N_CONFIG_ALIAS: { [key: string]: string[] } = {
