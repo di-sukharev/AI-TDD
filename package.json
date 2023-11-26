@@ -1,5 +1,5 @@
 {
-  "version": "2.0.1",
+  "version": "2.0.2",
   "name": "ai-tdd",
   "description": "You write a test -> AI-TDD writes the code to pass it ✅",
   "bin": {
