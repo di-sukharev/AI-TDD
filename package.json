@@ -20,7 +20,7 @@
     "access": "public"
   },
   "scripts": {
-    "start": "bun run index.ts",
+    "start": "bun run cli.ts",
     "test": "bun test",
     "posttest": "bun run __tests__/sandbox/clean.ts"
   },
