@@ -8,6 +8,17 @@
   "author": "https://github.com/di-sukharev",
   "module": "index.ts",
   "type": "module",
+  "files": [
+    "./"
+  ],
+  "release": {
+    "branches": [
+      "master"
+    ]
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "start": "bun run index.ts",
     "test": "bun test",
