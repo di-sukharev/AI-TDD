@@ -33,49 +33,42 @@ SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 CLI_FILE="$SCRIPT_DIR/cli.ts"
 ln -sf "$CLI_FILE" "$BIN_DIR/aitdd"
 
-# Function to update PATH in the shell configuration file
-update_path() {
-    local shell_config=$1
-    if [[ -w $shell_config ]]; then
-        echo -e "\n# aitdd tool" >> "$shell_config"
-        echo "export PATH=\"$BIN_DIR:\$PATH\"" >> "$shell_config"
-        info "Added $BIN_DIR to PATH in $shell_config"
-    else
-        info "Please add $BIN_DIR to your PATH manually. Edit $shell_config and add:"
-        info "export PATH=\"$BIN_DIR:\$PATH\""
-    fi
-}
-
-# Update PATH in the user's shell configuration file
-case $(basename "$SHELL") in
+# Detect the shell and update the corresponding configuration file
+SHELL_NAME=$(basename "$SHELL")
+case "$SHELL_NAME" in
     bash)
-        update_path "$HOME/.bashrc"
+        SHELL_CONFIG="$HOME/.bashrc"
         ;;
     zsh)
-        update_path "$HOME/.zshrc"
+        SHELL_CONFIG="$HOME/.zshrc"
         ;;
     fish)
-        # Fish shell has a different syntax for PATH update
-        if [[ -w $HOME/.config/fish/config.fish ]]; then
-            echo -e "\n# aitdd tool" >> "$HOME/.config/fish/config.fish"
-            echo "set -gx PATH \"$BIN_DIR\" \$PATH" >> "$HOME/.config/fish/config.fish"
-            info "Added $BIN_DIR to PATH in $HOME/.config/fish/config.fish"
-        else
-            info "Please add $BIN_DIR to your PATH manually. For Fish shell, edit $HOME/.config/fish/config.fish and add:"
-            info "set -gx PATH \"$BIN_DIR\" \$PATH"
-        fi
+        SHELL_CONFIG="$HOME/.config/fish/config.fish"
         ;;
     *)
-        info "Could not detect the shell automatically. Please add $BIN_DIR to your PATH manually."
+        SHELL_CONFIG=""
         ;;
 esac
 
-# Direct Execution Check
-if [[ ":$PATH:" != *":$BIN_DIR:"* ]]; then
-    export PATH="$BIN_DIR:$PATH"
+# Update PATH in the user's shell configuration file
+if [[ -n $SHELL_CONFIG && -w $SHELL_CONFIG ]]; then
+    if ! grep -q "$BIN_DIR" "$SHELL_CONFIG"; then
+        if [[ "$SHELL_NAME" == "fish" ]]; then
+            echo "set -gx PATH \"$BIN_DIR\" \$PATH" >> "$SHELL_CONFIG"
+        else
+            echo "export PATH=\"$BIN_DIR:\$PATH\"" >> "$SHELL_CONFIG"
+        fi
+        info "Added $BIN_DIR to PATH in $SHELL_CONFIG"
+    fi
+else
+    info "Could not update PATH automatically. Please add $BIN_DIR to your PATH manually."
 fi
 
-if command -v aitdd >/dev/null; then
+# Refresh environment (this won't affect the parent shell)
+export PATH="$BIN_DIR:$PATH"
+
+# Check if the tool is available in the PATH
+if command -v aitdd &> /dev/null; then
     info "aitdd tool installed successfully and is available in your PATH."
 else
     info "Installation complete, but the aitdd tool is not in your PATH. Please restart your shell or source your shell configuration file."
