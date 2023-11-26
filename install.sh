@@ -73,6 +73,16 @@ curl --fail --location --output "$exe.zip" "$aitdd_uri" ||
 unzip -oqd "$install_dir" "$exe.zip" ||
     error 'Failed to extract aitdd'
 
+tildify() {
+    if [[ $1 = $HOME/* ]]; then
+        local replacement=\~/
+
+        echo "${1/$HOME\//$replacement}"
+    else
+        echo "$1"
+    fi
+}
+
 # Create the aitdd wrapper command
 cat <<EOF >"$exe"
 #!/usr/bin/env bash
@@ -85,7 +95,7 @@ chmod +x "$exe" ||
     error 'Failed to set permissions on aitdd executable'
 
 # New section: Update shell configuration to include aitdd in PATH
-install_env=AiTDD_INSTALL
+install_env=AI_TDD_INSTALL
 bin_env=\$$install_env/bin
 
 tilde_bin_dir=$(tildify "$bin_dir")
