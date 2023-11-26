@@ -3,7 +3,8 @@
   "name": "ai-tdd",
   "description": "You write a test -> GPT writes the code to pass it ✅",
   "bin": {
-    "aitdd": "bun index.ts"
+    "aitdd": "bun index.ts",
+    "aidd": "bun index.ts run"
   },
   "author": "https://github.com/di-sukharev",
   "module": "index.ts",
