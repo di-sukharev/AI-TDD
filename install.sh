@@ -55,10 +55,12 @@ github_repo="$GITHUB/di-sukharev/ai-tdd"
 
 exe_name=aitdd
 
+target=out
+
 if [[ $# = 0 ]]; then
-    aitdd_uri=$github_repo/releases/latest/download/out.zip
+    aitdd_uri=$github_repo/releases/latest/download/$target.zip
 else
-    aitdd_uri=$github_repo/releases/download/$1/out.zip
+    aitdd_uri=$github_repo/releases/download/$1/$target.zip
 fi
 
 install_env=AITDD_INSTALL
