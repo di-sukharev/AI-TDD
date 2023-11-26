@@ -1,5 +1,4 @@
 import { outro } from "@clack/prompts";
-import { execa } from "execa";
 import { exe } from "./shell";
 
 export const assertGitRepo = async () => {
@@ -116,7 +115,8 @@ export const getDiff = async ({ files }: { files: string[] }) => {
     (file) => !file.includes(".lock") && !file.includes("-lock.")
   );
 
-  const { stdout: diff } = await execa("git", [
+  const { stdout: diff } = await exe([
+    "git",
     "diff",
     "--staged",
     "--",

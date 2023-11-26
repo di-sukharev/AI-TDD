@@ -11,6 +11,8 @@
     "module": "esnext",
     "target": "esnext",
 
+    "outDir": "./out",
+
     "moduleResolution": "bundler",
     "noEmit": true,
     "allowImportingTsExtensions": true,
