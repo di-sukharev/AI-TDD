@@ -41,7 +41,8 @@ update_path() {
         echo "export PATH=\"$BIN_DIR:\$PATH\"" >> "$shell_config"
         info "Added $BIN_DIR to PATH in $shell_config"
     else
-        error "Please add $BIN_DIR to your PATH manually."
+        info "Please add $BIN_DIR to your PATH manually. Edit $shell_config and add:"
+        info "export PATH=\"$BIN_DIR:\$PATH\""
     fi
 }
 
@@ -54,11 +55,28 @@ case $(basename "$SHELL") in
         update_path "$HOME/.zshrc"
         ;;
     fish)
-        update_path "$HOME/.config/fish/config.fish"
+        # Fish shell has a different syntax for PATH update
+        if [[ -w $HOME/.config/fish/config.fish ]]; then
+            echo -e "\n# aitdd tool" >> "$HOME/.config/fish/config.fish"
+            echo "set -gx PATH \"$BIN_DIR\" \$PATH" >> "$HOME/.config/fish/config.fish"
+            info "Added $BIN_DIR to PATH in $HOME/.config/fish/config.fish"
+        else
+            info "Please add $BIN_DIR to your PATH manually. For Fish shell, edit $HOME/.config/fish/config.fish and add:"
+            info "set -gx PATH \"$BIN_DIR\" \$PATH"
+        fi
         ;;
     *)
-        error "Unsupported shell. Please add $BIN_DIR to your PATH manually."
+        info "Could not detect the shell automatically. Please add $BIN_DIR to your PATH manually."
         ;;
 esac
 
-info "Installation complete. Please restart your shell or source your shell configuration file."
+# Direct Execution Check
+if [[ ":$PATH:" != *":$BIN_DIR:"* ]]; then
+    export PATH="$BIN_DIR:$PATH"
+fi
+
+if command -v aitdd >/dev/null; then
+    info "aitdd tool installed successfully and is available in your PATH."
+else
+    info "Installation complete, but the aitdd tool is not in your PATH. Please restart your shell or source your shell configuration file."
+fi
