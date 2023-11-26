@@ -8,10 +8,37 @@
 	<h2>GPT powered CLI for TDD</h2>
 	<h2>You write the test — GPT writes the code until it passes the test ✅</h2>
 	<p>Prompting GPT with a test suite makes it write code impressively accurate</p>
-	<a href="https://www.npmjs.com/package/aitdd"><img src="https://img.shields.io/npm/v/ai-tdd" alt="Current version"></a>
 </div>
 
 ---
+
+## Setup
+
+AITDD runs on [Bun](https://bun.sh/), installing AITDD will install latest Bun.
+
+1. Install AITDD globally as a CLI:
+
+   ```sh
+   curl -sSL https://github.com/di-sukharev/AI-TDD/blob/master/install.sh | bash
+   ```
+
+2. Get your API key from [OpenAI](https://platform.openai.com/account/api-keys). Make sure you add payment details, so API works.
+
+3. Set the key to AITDD config:
+
+   ```sh
+   aitdd config set OPENAI_API_KEY <your_api_key>
+   ```
+
+   Your api key is stored locally in `~/.aitdd` config file and is not stored anywhere in any other way.
+
+4. Set the command to run the tests:
+
+   ```sh
+   aitdd config set RUN_TESTS "npm run test"
+   ```
+
+Your api key is stored locally in `~/.aitdd` config file and is not stored anywhere in any other way.
 
 ## Example
 
@@ -104,50 +131,12 @@ function Fetch({ url }) {
 export default Fetch;
 ```
 
-## Setup
-
-1. Install AITDD globally to use in any repository:
-
-   ```sh
-   npm install -g aitdd
-   ```
-
-2. Get your API key from [OpenAI](https://platform.openai.com/account/api-keys). Make sure you add payment details, so API works.
-
-3. Set the key to AITDD config:
-
-   ```sh
-   aitdd config set OPENAI_API_KEY <your_api_key>
-   ```
-
-   Your api key is stored locally in `~/.aitdd` config file and is not stored anywhere in any other way.
-
-4. Set the command to run the tests:
-
-   ```sh
-   aitdd config set RUN_TESTS "npm run test"
-   ```
-
-   Your api key is stored locally in `~/.aitdd` config file and is not stored anywhere in any other way.
-
 ## Usage
 
 You can call aitdd like this:
 
 ```sh
 aitdd run
-```
-
-You can also call it via `ait` or `tdd` shortcuts:
-
-```sh
-ait run
-```
-
-Or:
-
-```sh
-tdd run
 ```
 
 ## Payments

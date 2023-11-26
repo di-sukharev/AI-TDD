@@ -23,8 +23,7 @@
   "scripts": {
     "start": "bun run index.ts",
     "test": "bun test",
-    "posttest": "bun run __tests__/sandbox/clean.ts",
-    "deploy": "bun build ./index.ts --outfile=index.js --outdir=out --target=node --minify && npm version patch && npm publish --tag latest"
+    "posttest": "bun run __tests__/sandbox/clean.ts"
   },
   "devDependencies": {
     "@types/ini": "^1.3.31",
