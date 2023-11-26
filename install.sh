@@ -94,49 +94,42 @@ EOF
 chmod +x "$exe" ||
     error 'Failed to set permissions on aitdd executable'
 
-# New section: Update shell configuration to include aitdd in PATH
+# Update shell configuration to include aitdd in PATH
 install_env=AI_TDD_INSTALL
-bin_env=\$$install_env/bin
+bin_env="$install_dir/bin"
 
-tilde_bin_dir=$(tildify "$bin_dir")
-quoted_install_dir=\"${install_dir//\"/\\\"}\"
+# Detecting the shell
+current_shell=$(ps -p $$ -ocomm=)
 
-case $(basename "$SHELL") in
-fish)
-    fish_config=$HOME/.config/fish/config.fish
-    if [[ -w $fish_config ]]; then
-        echo -e '\n# AiTDD\nset --export $install_env $quoted_install_dir\nset --export PATH $bin_env \$PATH' >> "$fish_config"
-        echo "Added \"$tilde_bin_dir\" to \$PATH in fish config"
+update_path() {
+    local config_file=$1
+    local config_file_tilde=${config_file/#$HOME/\~}
+
+    if [[ -w $config_file ]]; then
+        echo "export $install_env=\"$install_dir\"" >> "$config_file"
+        echo "export PATH=\"$bin_env:\$PATH\"" >> "$config_file"
+        echo "Updated $config_file_tilde with AiTDD PATH"
     else
-        echo "Manually add the following lines to your fish config ($fish_config):"
-        echo "  set --export $install_env $quoted_install_dir"
-        echo "  set --export PATH $bin_env \$PATH"
-    fi
-    ;;
-zsh)
-    zsh_config=$HOME/.zshrc
-    if [[ -w $zsh_config ]]; then
-        echo -e '\n# AiTDD\nexport $install_env=$quoted_install_dir\nexport PATH=\"$bin_env:\$PATH\"' >> "$zsh_config"
-        echo "Added \"$tilde_bin_dir\" to \$PATH in zsh config"
-    else
-        echo "Manually add the following lines to your zsh config ($zsh_config):"
-        echo "  export $install_env=$quoted_install_dir"
+        echo "Please add the following lines to your $config_file_tilde:"
+        echo "  export $install_env=\"$install_dir\""
         echo "  export PATH=\"$bin_env:\$PATH\""
     fi
+}
+
+case "$current_shell" in
+*fish)
+    update_path "$HOME/.config/fish/config.fish"
     ;;
-bash)
-    bash_config=$HOME/.bashrc
-    if [[ -w $bash_config ]]; then
-        echo -e '\n# AiTDD\nexport $install_env=$quoted_install_dir\nexport PATH=$bin_env:\$PATH' >> "$bash_config"
-        echo "Added \"$tilde_bin_dir\" to \$PATH in bash config"
-    else
-        echo "Manually add the following lines to your bash config ($bash_config):"
-        echo "  export $install_env=$quoted_install_dir"
-        echo "  export PATH=$bin_env:\$PATH"
-    fi
+*zsh)
+    update_path "$HOME/.zshrc"
+    ;;
+*bash)
+    update_path "$HOME/.bashrc"
+    update_path "$HOME/.bash_profile"
     ;;
 *)
-    echo "Your shell is not explicitly supported for automatic PATH update. Please add $bin_dir to your PATH manually."
+    echo "Your shell ($current_shell) is not explicitly supported for automatic PATH update."
+    echo "Please add $bin_env to your PATH manually."
     ;;
 esac
 
