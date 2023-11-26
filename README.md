@@ -14,7 +14,7 @@
 
 ## Setup
 
-AITDD runs on [Bun](https://bun.sh/), installing AITDD will install latest Bun.
+AITDD runs on [Bun](https://bun.sh/), make sure you first install the latest Bun version.
 
 1. Install AITDD globally as a CLI:
 

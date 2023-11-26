@@ -44,6 +44,16 @@ success() {
     echo -e "${Green}$@ ${Color_Off}"
 }
 
+tildify() {
+    if [[ $1 = $HOME/* ]]; then
+        local replacement=\~/
+
+        echo "${1/$HOME\//$replacement}"
+    else
+        echo "$1"
+    fi
+}
+
 # [Initialize color codes and helper functions as in bun.sh]
 
 # Check for bun
@@ -72,16 +82,6 @@ curl --fail --location --output "$exe.zip" "$aitdd_uri" ||
 
 unzip -oqd "$install_dir" "$exe.zip" ||
     error 'Failed to extract aitdd'
-
-tildify() {
-    if [[ $1 = $HOME/* ]]; then
-        local replacement=\~/
-
-        echo "${1/$HOME\//$replacement}"
-    else
-        echo "$1"
-    fi
-}
 
 # Create the aitdd wrapper command
 cat <<EOF >"$exe"
