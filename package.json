@@ -3,14 +3,14 @@
   "name": "ai-tdd",
   "description": "You write a test -> GPT writes the code to pass it ✅",
   "bin": {
-    "aitdd": "bun index.ts",
-    "aidd": "bun index.ts run"
+    "aitdd": "./out/index.js",
+    "ait": "./out/index.js"
   },
   "author": "https://github.com/di-sukharev",
   "module": "index.ts",
   "type": "module",
   "files": [
-    "./"
+    "./out/index.js"
   ],
   "release": {
     "branches": [
@@ -24,7 +24,7 @@
     "start": "bun run index.ts",
     "test": "bun test",
     "posttest": "bun run __tests__/sandbox/clean.ts",
-    "deploy": "npm version patch && npm publish --tag latest"
+    "deploy": "bun build ./index.ts --outfile=index.js --outdir=out --target=node --minify && npm version patch && npm publish --tag latest"
   },
   "devDependencies": {
     "@types/ini": "^1.3.31",
