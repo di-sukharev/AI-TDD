@@ -58,9 +58,9 @@ exe_name=aitdd
 target=out
 
 if [[ $# = 0 ]]; then
-    aitdd_uri=$github_repo/releases/latest/download/$target.zip
+    aitdd_uri=$github_repo/releases/latest/download/$exe_name-$target.zip
 else
-    aitdd_uri=$github_repo/releases/download/$1/$target.zip
+    aitdd_uri=$github_repo/releases/download/$1/$exe_name-$target.zip
 fi
 
 install_env=AITDD_INSTALL
@@ -83,6 +83,12 @@ unzip -oqd "$bin_dir" "$exe.zip" ||
 
 mv "$bin_dir/aitdd-$target/$exe_name" "$exe" ||
     error 'Failed to move extracted aitdd to destination'
+
+cat <<EOF >"$exe"
+#!/usr/bin/env bash
+set -euo pipefail
+bun $install_dir/out/cli.js "\$@"
+EOF
 
 chmod +x "$exe" ||
     error 'Failed to set permissions on aitdd executable'

@@ -20,7 +20,7 @@
     "start": "bun run cli.ts",
     "test": "bun test",
     "posttest": "bun run __tests__/sandbox/clean.ts",
-    "build": "bun build ./cli.ts --target=bun --outdir=out"
+    "build": "bun build ./cli.ts --target=bun --outfile=out/aitdd.js"
   },
   "devDependencies": {
     "@types/ini": "^1.3.31",
