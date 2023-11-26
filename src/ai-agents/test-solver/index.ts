@@ -26,7 +26,6 @@ class TestSolverAgent {
           "You are to act as an AI agent that solves tests in REPL mode as per the Test-Driven Development (TDD) practices.",
           "I send you a test suite code, then you recognize the tech stack and generate production ready code to pass all the tests.",
           "Adhere strictly to Test-Driven Development (TDD) practices, ensuring that all code written is robust, efficient, and passes the tests.",
-          "Call a tool in each response to improve collaboration performance.",
         ].join("\n"),
       },
       {
@@ -58,8 +57,6 @@ class TestSolverAgent {
 
   async callOpenAi({ testFile, relevantFiles, error, context = [] }: Props) {
     const prompt = this.getChatCompletionPrompt(testFile, error, relevantFiles);
-
-    console.log({ prompt });
 
     const chat = [...prompt, ...context];
 
@@ -101,13 +98,11 @@ class TestSolverAgent {
         error,
         context,
       });
-      // TODO: map over tool_calls and describe what it wants to do
 
       loader.stop("GPT has an idea, applying 🔧🪛🔨");
 
-      // todo: validate the codeToAdjust structure with joi
-
-      console.log({ message: JSON.stringify(message) });
+      // TODO: stream to stdout
+      console.info(message.content!);
 
       return message;
     } catch (error) {

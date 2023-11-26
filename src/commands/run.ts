@@ -1,6 +1,6 @@
-import { intro, isCancel, note, select } from "@clack/prompts";
+import { intro, note } from "@clack/prompts";
 import { command } from "cleye";
-import { fileManipulator } from "../services/file-manager/fileManagerService";
+import OpenAI from "openai";
 import { testFinder } from "../services/test-finder/testFinderService";
 import { testRunner } from "../services/test-runner/testRunnerService";
 import {
@@ -10,9 +10,6 @@ import {
 import { call } from "../utils/call";
 import { outroError, outroSuccess } from "../utils/prompts";
 import { COMMANDS } from "./enums";
-import { codeNavigatorService } from "../services/code-navigator/codeNavigatorService";
-import chalk from "chalk";
-import OpenAI from "openai";
 
 export const runCommand = command(
   {
@@ -43,36 +40,29 @@ export const runCommand = command(
       const result = await testRunner.assert(testFilePath);
 
       if (result.failed) {
-        const { callOutputs, message } = await testSolver.solve({
+        const message = await testSolver.solve({
           testFilePath,
           error: result.message,
           context,
         });
 
         if (message.content)
-          note(message.content); // todo: stream tokens to stdout
+          console.info(message.content); // todo: stream tokens to stdout
         else note("No content in message");
 
         context.push(message);
 
-        callOutputs?.forEach((out: ToolCallOutput) =>
-          context.push({
-            role: "tool",
-            tool_call_id: out.callId,
-            content: out.content,
-          })
-        );
+        if (message.tool_calls) {
+          const callOutputs = await testSolver.callTools(message.tool_calls);
 
-        const confirmExecution = await select({
-          message: chalk.cyan(`Execute command?`),
-          options: [
-            { value: true, label: "✅" },
-            { value: false, label: "🚫" },
-          ],
-        });
-
-        if (isCancel(confirmExecution) || !confirmExecution)
-          return process.exit(1);
+          callOutputs?.forEach((out: ToolCallOutput) =>
+            context.push({
+              role: "tool",
+              tool_call_id: out.callId,
+              content: out.content,
+            })
+          );
+        }
 
         attempts--;
       } else {

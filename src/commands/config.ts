@@ -1,20 +1,21 @@
-import chalk from "chalk";
+import { intro, outro } from "@clack/prompts";
 import { command } from "cleye";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { parse as iniParse, stringify as iniStringify } from "ini";
 import { homedir } from "os";
 import { join as pathJoin } from "path";
-import { intro, outro } from "@clack/prompts";
-import { outroError, outroSuccess } from "../utils/prompts";
 import { getI18nLocal } from "../i18n";
+import { outroError, outroSuccess } from "../utils/prompts";
 import { COMMANDS } from "./enums";
 
 export enum CONFIG_KEYS {
   OPENAI_API_KEY = "OPENAI_API_KEY",
   MODEL = "MODEL",
+  RUN_TESTS = "RUN_TESTS",
   LANGUAGE = "LANGUAGE",
 }
 
+export const DEFAULT_MODEL = "gpt-4-1106-preview";
 export const DEFAULT_MODEL_TOKEN_LIMIT = 100_000;
 
 enum CONFIG_COMMAND_MODES {
@@ -52,20 +53,34 @@ export const configValidators = {
       getI18nLocal(value),
       `${value} is not supported yet`
     );
+
     return getI18nLocal(value);
+  },
+
+  [CONFIG_KEYS.RUN_TESTS](value: any) {
+    console.log({ value });
+    validateConfig(
+      CONFIG_KEYS.RUN_TESTS,
+      typeof value === "string",
+      `${value} is not of type string`
+    );
+
+    return value;
   },
 
   [CONFIG_KEYS.MODEL](value: any) {
     validateConfig(
       CONFIG_KEYS.MODEL,
       [
-        "gpt-3.5-turbo",
+        DEFAULT_MODEL,
         "gpt-4",
+        "gpt-3.5-turbo",
         "gpt-3.5-turbo-16k",
         "gpt-3.5-turbo-0613",
       ].includes(value),
-      `${value} is not supported yet, use 'gpt-4', 'gpt-3.5-turbo-16k' (default), 'gpt-3.5-turbo-0613' or 'gpt-3.5-turbo'`
+      `${value} is not supported yet, 'gpt-4-1106-preview' (default), 'gpt-4', or 'gpt-3.5-turbo'`
     );
+
     return value;
   },
 };
@@ -77,19 +92,18 @@ export type ConfigType = {
 const configPath = pathJoin(homedir(), ".aitdd");
 
 export const getConfig = (): ConfigType | null => {
+  const defaults = {
+    [CONFIG_KEYS.RUN_TESTS]: null,
+    [CONFIG_KEYS.OPENAI_API_KEY]: null,
+    [CONFIG_KEYS.MODEL]: DEFAULT_MODEL,
+    [CONFIG_KEYS.LANGUAGE]: "en",
+  };
+
   const configFromEnv = {
-    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
-    OPENAI_MAX_TOKENS: process.env.OPENAI_MAX_TOKENS
-      ? Number(process.env.OPENAI_MAX_TOKENS)
-      : undefined,
-    OPENAI_BASE_PATH: process.env.OPENAI_BASE_PATH,
-    DESCRIPTION: process.env.DESCRIPTION === "true" ? true : false,
-    EMOJI: process.env.EMOJI === "true" ? true : false,
-    MODEL: process.env.MODEL || "gpt-3.5-turbo-16k",
-    LANGUAGE: process.env.LANGUAGE || "en",
-    MESSAGE_TEMPLATE_PLACEHOLDER:
-      process.env.MESSAGE_TEMPLATE_PLACEHOLDER || "$msg",
-    PROMPT_MODULE: process.env.PROMPT_MODULE || "conventional-commit",
+    [CONFIG_KEYS.OPENAI_API_KEY]: process.env.OPENAI_API_KEY,
+    [CONFIG_KEYS.MODEL]: process.env.MODEL || defaults.MODEL,
+    [CONFIG_KEYS.LANGUAGE]: process.env.LANGUAGE || defaults.LANGUAGE,
+    [CONFIG_KEYS.RUN_TESTS]: process.env.RUN_TESTS || null,
   };
 
   const configExists = existsSync(configPath);
@@ -103,9 +117,11 @@ export const getConfig = (): ConfigType | null => {
       !config[configKey] ||
       ["null", "undefined"].includes(config[configKey])
     ) {
-      config[configKey] = undefined;
+      config[configKey] = defaults[configKey as CONFIG_KEYS];
+
       continue;
     }
+
     try {
       const validator = configValidators[configKey as CONFIG_KEYS];
       const validValue = validator(
@@ -126,26 +142,23 @@ export const getConfig = (): ConfigType | null => {
   return config;
 };
 
-export const setConfig = (keyValues: [key: string, value: string][]) => {
+export const setConfig = (key: string, value: string) => {
   const config = getConfig() || {};
 
-  for (const [configKey, configValue] of keyValues) {
-    if (!configValidators.hasOwnProperty(configKey)) {
-      throw new Error(`Unsupported config key: ${configKey}`);
-    }
-
-    let parsedConfigValue;
-
-    try {
-      parsedConfigValue = JSON.parse(configValue);
-    } catch (error) {
-      parsedConfigValue = configValue;
-    }
-
-    const validValue =
-      configValidators[configKey as CONFIG_KEYS](parsedConfigValue);
-    config[configKey as CONFIG_KEYS] = validValue;
+  if (!configValidators.hasOwnProperty(key)) {
+    throw new Error(`Unsupported config key: ${key}`);
   }
+
+  let parsedConfigValue;
+
+  try {
+    parsedConfigValue = JSON.parse(value);
+  } catch (error) {
+    parsedConfigValue = value;
+  }
+
+  const validValue = configValidators[key as CONFIG_KEYS](parsedConfigValue);
+  config[key as CONFIG_KEYS] = validValue;
 
   writeFileSync(configPath, iniStringify(config), "utf8");
 
@@ -155,22 +168,21 @@ export const setConfig = (keyValues: [key: string, value: string][]) => {
 export const configCommand = command(
   {
     name: COMMANDS.config,
-    parameters: ["<mode>", "<key=values...>"],
+    parameters: ["<mode>", "<key>", "<values...>"],
   },
   async (argv) => {
     intro("ai-tdd — config");
     try {
-      const { mode, keyValues } = argv._;
+      const { mode, key, values } = argv._;
 
+      console.log({ mode, key, values });
       if (mode === CONFIG_COMMAND_MODES.get) {
         const config = getConfig() || {};
-        for (const key of keyValues) {
+        for (const key of values) {
           outro(`${key}=${config[key as keyof typeof config]}`);
         }
       } else if (mode === CONFIG_COMMAND_MODES.set) {
-        await setConfig(
-          keyValues.map((keyValue) => keyValue.split("=") as [string, string])
-        );
+        await setConfig(key, values.join(" "));
       } else {
         throw new Error(
           `Unsupported mode: ${mode}. Valid modes are: "set" and "get"`

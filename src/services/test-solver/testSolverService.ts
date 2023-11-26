@@ -1,13 +1,12 @@
-/*
-    This service tries to solve a test file
-*/
+/* This service tries to solve a test file */
 
-import { outroError } from "src/utils/prompts";
-import { testSolverAgent } from "../../ai-agents/test-solver";
-import { CodeToWrite } from "../../types";
-import { fileManipulator } from "../file-manager/fileManagerService";
+import { isCancel, select } from "@clack/prompts";
+import chalk from "chalk";
 import OpenAI from "openai";
+import { outroError } from "src/utils/prompts";
 import { exe } from "src/utils/shell";
+import { testSolverAgent } from "../../ai-agents/test-solver";
+import { fileManipulator } from "../file-manipulator/fileManipulatorService";
 
 interface testRelevantFile {
   name: string;
@@ -26,24 +25,41 @@ export interface ToolCallOutput {
 
 class TestSolverService {
   async callTools(
-    toolCalls: OpenAI.Chat.Completions.ChatCompletionMessageToolCall[]
+    tools: OpenAI.Chat.Completions.ChatCompletionMessageToolCall[]
   ): Promise<ToolCallOutput[]> {
     const outputs: ToolCallOutput[] = [];
 
-    for (const toolCall of toolCalls) {
-      try {
-        const args = JSON.parse(toolCall.function.arguments);
+    for (const tool of tools) {
+      console.info(
+        `Call function ${chalk.green(
+          tool.function.name
+        )} with arguments ${chalk.magenta(tool.function.arguments)}`
+      );
 
-        switch (toolCall.function.name) {
+      const confirmExecution = await select({
+        message: `Run?`,
+        options: [
+          { value: true, label: "✅" },
+          { value: false, label: "🚫" },
+        ],
+      });
+
+      if (isCancel(confirmExecution) || !confirmExecution) process.exit(1);
+
+      try {
+        const args = JSON.parse(tool.function.arguments);
+
+        // TODO: sanitize directory, namePattern, and type...
+
+        switch (tool.function.name) {
           case "awk": {
-            // Perform validation for arguments specific to awk
             const { pattern, filePath } = args;
-            // Validate pattern and filePath...
+
             const { stdout } = await exe(["awk", pattern, filePath]);
 
             outputs.push({
-              callId: toolCall.id,
-              name: toolCall.function.name,
+              callId: tool.id,
+              name: tool.function.name,
               content: stdout,
             });
 
@@ -51,9 +67,8 @@ class TestSolverService {
           }
 
           case "grep": {
-            // Perform validation for arguments specific to grep
             const { pattern, filePath, flags } = args;
-            // Validate pattern, filePath, and flags...
+
             const flagString = flags.join(" ");
             const { stdout } = await exe([
               "grep",
@@ -63,8 +78,8 @@ class TestSolverService {
             ]);
 
             outputs.push({
-              callId: toolCall.id,
-              name: toolCall.function.name,
+              callId: tool.id,
+              name: tool.function.name,
               content: stdout,
             });
 
@@ -72,9 +87,8 @@ class TestSolverService {
           }
 
           case "find": {
-            // Perform validation for arguments specific to find
             const { directory, namePattern, type } = args;
-            // Validate directory, namePattern, and type...
+
             const typeFlag = type === "file" ? "-type f" : "-type d";
             const { stdout } = await exe([
               "find",
@@ -85,8 +99,8 @@ class TestSolverService {
             ]);
 
             outputs.push({
-              callId: toolCall.id,
-              name: toolCall.function.name,
+              callId: tool.id,
+              name: tool.function.name,
               content: stdout,
             });
 
@@ -94,7 +108,6 @@ class TestSolverService {
           }
 
           case "write_code": {
-            // Perform validation for arguments specific to write_code
             const { modifications } = args as {
               modifications: Array<{
                 filePath: string;
@@ -106,19 +119,11 @@ class TestSolverService {
               }>;
             };
 
-            // Validate modifications...
-
-            // Here you would apply the changes to the code as specified.
-            // Since the OpenAI API cannot actually modify files, you would
-            // simulate this by perhaps outputting the intended changes or
-            // providing a description of what would be done.
-            // This is just a placeholder for the logic you would implement.
-
             const response = await fileManipulator.manage(modifications);
 
             outputs.push({
-              callId: toolCall.id,
-              name: toolCall.function.name,
+              callId: tool.id,
+              name: tool.function.name,
               content:
                 response.reduce((acc, result) => `${acc}\n${result}`, "") ?? "",
             });
@@ -127,11 +132,11 @@ class TestSolverService {
           }
 
           default:
-            throw new Error(`Unsupported tool name: ${toolCall.function.name}`);
+            throw new Error(`Unsupported tool name: ${tool.function.name}`);
         }
       } catch (error) {
         console.error("Error calling tool:", {
-          toolCallId: toolCall.id,
+          toolCallId: tool.id,
           error,
         });
 
@@ -166,12 +171,7 @@ class TestSolverService {
       return process.exit(1);
     }
 
-    if (message.tool_calls) {
-      const callOutputs = await this.callTools(message.tool_calls);
-      return { message, callOutputs };
-    }
-
-    return { message };
+    return message;
   }
 }
 

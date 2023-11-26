@@ -1,8 +1,6 @@
-import fs from "node:fs/promises";
+/* This service manipulates code: replaces, prepends, appends lines */
 
-/*
-    This service manipulates the code in current repo: replaces, prepends, appends lines
-*/
+import fs from "node:fs/promises";
 
 interface IContent {
   row: string;
@@ -110,9 +108,11 @@ class FileManipulator {
   }
 
   async manage(files: FileToManipulate[]) {
-    return await Promise.all(
-      files.map((file) => this.writeFileContent(file.filePath, file.content))
-    );
+    const outputs = [];
+    for (const file of files)
+      outputs.push(await this.writeFileContent(file.filePath, file.content));
+
+    return outputs;
   }
 }
 

@@ -1,6 +1,4 @@
-/*
-    This service finds test(s) to operate on
-*/
+/* This service finds test(s) to operate on */
 
 import { isCancel, note, select, text } from "@clack/prompts";
 import chalk from "chalk";
