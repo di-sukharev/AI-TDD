@@ -3,14 +3,13 @@
   "name": "ai-tdd",
   "description": "You write a test -> GPT writes the code to pass it ✅",
   "bin": {
-    "aitdd": "./out/index.js",
-    "ait": "./out/index.js"
+    "aitdd": ".cli.ts"
   },
   "author": "https://github.com/di-sukharev",
-  "module": "index.ts",
+  "module": "cli.ts",
   "type": "module",
   "files": [
-    "./out/index.js"
+    "./out/cli.js"
   ],
   "release": {
     "branches": [

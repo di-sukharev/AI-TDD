@@ -19,7 +19,7 @@ AITDD runs on [Bun](https://bun.sh/), installing AITDD will install latest Bun.
 1. Install AITDD globally as a CLI:
 
    ```sh
-   curl -sSL https://github.com/di-sukharev/AI-TDD/blob/master/install.sh | bash
+   curl -sSL https://raw.githubusercontent.com/di-sukharev/AI-TDD/master/install.sh | bash
    ```
 
 2. Get your API key from [OpenAI](https://platform.openai.com/account/api-keys). Make sure you add payment details, so API works.
