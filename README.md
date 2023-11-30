@@ -2,7 +2,7 @@
   <div>
     <img src=".github/logo-sexy.svg" alt="aitdd logo"/>
     <h1 align="center">AI + TDD</h1>
-    <h4 align="center">Follow the bird <a href="https://twitter.com/_sukharev_i"><img src="https://img.shields.io/twitter/follow/_sukharev_i?style=flat&label=_sukharev_i&logo=twitter&color=0bf&logoColor=fff" align="center"></a>
+    <h4 align="center">Follow the bird <a href="https://twitter.com/_sukharev_"><img src="https://img.shields.io/twitter/follow/_sukharev_?style=flat&label=_sukharev_&logo=twitter&color=0bf&logoColor=fff" align="center"></a>
     </h4>
   </div>
 	<h2>GPT powered CLI for TDD</h2>
